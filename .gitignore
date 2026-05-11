@@ -1,3 +1,6 @@
+venv/
+**/__pycache__/
+
 backend/venv/
 backend/__pycache__/
 backend/**/__pycache__/
@@ -7,6 +10,7 @@ backend/*.db
 backend/.env
 
 frontend/node_modules/
+backend/venv/
 frontend/dist/
 frontend/.env
 frontend/.env.local
