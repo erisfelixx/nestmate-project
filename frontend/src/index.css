@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #F7F6FC;
+  --surface: #FFFFFF;
+  --accent: #7C5CBF;
+  --accent-hover: #6A4DAD;
+  --accent-secondary: #EDE8F8;
+  --text: #1A1726;
+  --text-secondary: #7A7090;
+  --border: #E4E0F0;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 2px 12px rgba(124,92,191,0.08);
+}
+
+[data-theme="dark"] {
+  --bg: #18171F;
+  --surface: #22202E;
+  --accent: #9E7EE0;
+  --accent-hover: #B598F0;
+  --accent-secondary: #2E244A;
+  --text: #EDEAF5;
+  --text-secondary: #9E98B8;
+  --border: #2E2A3E;
+  --shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Manrope', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  transition: background 0.2s, color 0.2s;
+}
+
+.serif { font-family: 'DM Serif Display', serif; }
+
+button {
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  transition: all 0.15s;
+}
+
+.btn {
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.btn:hover { background: var(--accent-secondary); }
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: var(--text-secondary);
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(24,23,31,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.15s ease;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 2rem;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
