@@ -53,8 +53,12 @@ export default function Search() {
   const fetchGroups = async () => {
     try {
       const res = await api.get('/groups/')
+      console.log('Групи:', res.data)
       setGroups(res.data)
-    } catch { setGroups([]) }
+    } catch (e) {
+      console.log('Помилка груп:', e.response?.data)
+      setGroups([])
+    }
   }
 
   const setFilter = (key, val) =>
@@ -263,40 +267,45 @@ export default function Search() {
 
           {/* Картки */}
           {!loading && !error && (
-            <div style={styles.grid}>
-              {filtered.map(match => (
-                <MatchCard
-                  key={match.profile_id}
-                  match={match}
-                  onClick={() => setSelected(match)}
-                />
-              ))}
-            </div>
+            <>
+              {/* Тимчасовий лічильник для перевірки */}
+              <div style={{ fontWeight: 'bold', color: '#7C5CBF', marginBottom: '10px', fontSize: '13px' }}>
+                Знайдено: {showIndividuals ? filtered.length : 0} анкет та {showGroups ? groups.length : 0} груп
+              </div>
+
+              <div style={styles.grid}>
+                {/* 1. Виводимо людей */}
+                {showIndividuals && filtered.map(match => (
+                  <MatchCard
+                    key={match.profile_id}
+                    match={match}
+                    onClick={() => setSelected(match)}
+                  />
+                ))}
+
+                {/* 2. Виводимо групи */}
+                {showGroups && groups
+                  .filter(g => filters.city === 'Всі міста' || g.city === filters.city)
+                  .map(group => (
+                    <GroupCard
+                      key={group.group_id}
+                      group={group}
+                      onApply={async () => {
+                        try {
+                          await api.post(`/groups/${group.group_id}/apply`)
+                          fetchGroups()
+                          alert('Заявку до групи надіслано!')
+                        } catch (e) {
+                          alert(e.response?.data?.detail || 'Помилка')
+                        }
+                      }}
+                    />
+                  ))}
+              </div>
+            </>
           )}
         </main>
       </div>
-
-      {/* Групи */}
-      {!loading && !error && (
-        <div style={styles.grid}>
-          {showIndividuals && filtered.map(match => (
-            <MatchCard key={match.profile_id} match={match}
-              onClick={() => setSelected(match)} />
-          ))}
-          {showGroups && groups.map(group => (
-            <GroupCard key={group.group_id} group={group}
-              onApply={async () => {
-                try {
-                  await api.post(`/groups/${group.group_id}/apply`)
-                  fetchGroups()
-                } catch (e) {
-                  alert(e.response?.data?.detail || 'Помилка')
-                }
-              }}
-            />
-          ))}
-        </div>
-      )}
 
       {/* Спливаюче вікно профілю */}
       {selected && (

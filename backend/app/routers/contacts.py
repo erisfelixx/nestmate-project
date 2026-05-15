@@ -49,16 +49,23 @@ def incoming_requests(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Вхідні запити, що очікують відповіді"""
     requests = get_incoming_requests(db, current_user.id)
-    return [
-        {
+    result = []
+    for r in requests:
+        profile = get_profile_by_user_id(db, r.sender_id)
+        result.append({
             "request_id": r.id,
             "from_user_id": r.sender_id,
-            "created_at": r.created_at
-        }
-        for r in requests
-    ]
+            "created_at": r.created_at,
+            "name": profile.name if profile else None,
+            "age": profile.age if profile else None,
+            "city": profile.city if profile else None,
+            "photo_url": profile.photo_url if profile else None,
+            "schedule": profile.schedule if profile else None,
+            "cleanliness": profile.cleanliness if profile else None,
+            "bio": profile.bio if profile else None,
+        })
+    return result
 
 @router.get("/accepted")
 def accepted_contacts(

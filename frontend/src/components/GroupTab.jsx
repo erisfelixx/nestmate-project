@@ -10,15 +10,21 @@ export default function GroupTab() {
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [contacts, setContacts] = useState([])
 
   const CITIES = [
-    'Київ','Львів','Харків','Одеса','Дніпро','Запоріжжя',
-    'Вінниця','Полтава','Чернігів','Житомир','Хмельницький',
-    'Черкаси','Івано-Франківськ','Тернопіль','Луцьк','Рівне',
-    'Ужгород','Кропивницький','Чернівці',
+    'Київ', 'Львів', 'Харків', 'Одеса', 'Дніпро', 'Запоріжжя',
+    'Вінниця', 'Полтава', 'Чернігів', 'Житомир', 'Хмельницький',
+    'Черкаси', 'Івано-Франківськ', 'Тернопіль', 'Луцьк', 'Рівне',
+    'Ужгород', 'Кропивницький', 'Чернівці',
   ]
 
-  useEffect(() => { fetchGroup() }, [])
+  useEffect(() => {
+    fetchGroup()
+    api.get('/contacts/accepted')
+      .then(res => setContacts(res.data))
+      .catch(() => { })
+  }, [])
 
   const fetchGroup = async () => {
     setLoading(true)
@@ -60,6 +66,17 @@ export default function GroupTab() {
     }
   }
 
+  const handleInvite = async (userId) => {
+    try {
+      await api.post(`/groups/me/invite/${userId}`)
+      setSuccess('Користувача додано!')
+      fetchGroup()
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (e) {
+      setError(e.response?.data?.detail || 'Помилка')
+    }
+  }
+
   if (loading) return <div style={s.empty}>Завантаження...</div>
 
   // форма створення групи
@@ -81,19 +98,19 @@ export default function GroupTab() {
       <div style={s.fields}>
         <Field label="Назва групи">
           <input style={s.input} placeholder="Шукаємо третього у Києві"
-            value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))} />
+            value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
         </Field>
         <div style={s.grid2}>
           <Field label="Місто">
             <select style={s.input} value={form.city}
-              onChange={e => setForm(f => ({...f, city: e.target.value}))}>
+              onChange={e => setForm(f => ({ ...f, city: e.target.value }))}>
               <option value="">Оберіть...</option>
               {CITIES.map(c => <option key={c}>{c}</option>)}
             </select>
           </Field>
           <Field label="Кількість людей разом">
             <select style={s.input} value={form.target_size}
-              onChange={e => setForm(f => ({...f, target_size: e.target.value}))}>
+              onChange={e => setForm(f => ({ ...f, target_size: e.target.value }))}>
               <option value={2}>2 людини</option>
               <option value={3}>3 людини</option>
               <option value={4}>4 людини</option>
@@ -104,12 +121,12 @@ export default function GroupTab() {
           <Field label="Бюджет від (грн)">
             <input style={s.input} type="number" placeholder="4000"
               value={form.budget_min}
-              onChange={e => setForm(f => ({...f, budget_min: e.target.value}))} />
+              onChange={e => setForm(f => ({ ...f, budget_min: e.target.value }))} />
           </Field>
           <Field label="Бюджет до (грн)">
             <input style={s.input} type="number" placeholder="12000"
               value={form.budget_max}
-              onChange={e => setForm(f => ({...f, budget_max: e.target.value}))} />
+              onChange={e => setForm(f => ({ ...f, budget_max: e.target.value }))} />
           </Field>
         </div>
       </div>
@@ -123,7 +140,7 @@ export default function GroupTab() {
 
   // інформація про групу
   return (
-    <div style={{display:'flex', flexDirection:'column', gap:'12px'}}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
       {success && <div style={s.successMsg}>{success}</div>}
       {error && <div style={s.errorMsg}>{error}</div>}
@@ -137,7 +154,7 @@ export default function GroupTab() {
               {group.city} · бюджет {group.budget_min}–{group.budget_max} грн
             </div>
           </div>
-          <div style={{display:'flex', gap:'8px', alignItems:'center'}}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <span style={s.badge(group.current_size < group.target_size)}>
               {group.current_size} / {group.target_size}
             </span>
@@ -155,14 +172,14 @@ export default function GroupTab() {
               <div style={s.memberName}>{m.name}, {m.age}</div>
               <div style={s.memberSub}>
                 {m.schedule === 'early_bird' ? '🌅 Жайворонок' :
-                 m.schedule === 'night_owl'  ? '🦉 Сова' : ''}
+                  m.schedule === 'night_owl' ? '🦉 Сова' : ''}
               </div>
               {m.is_creator && <div style={s.creatorTag}>засновник</div>}
             </div>
           ))}
 
           {/* Порожні слоти */}
-          {Array.from({length: group.target_size - group.current_size}).map((_, i) => (
+          {Array.from({ length: group.target_size - group.current_size }).map((_, i) => (
             <div key={i} style={s.emptySlot}>
               <div style={s.emptySlotIcon}>+</div>
               <div style={s.emptySlotText}>Вільне місце</div>
@@ -171,12 +188,49 @@ export default function GroupTab() {
         </div>
       </div>
 
+      {group.current_size < group.target_size && (
+        <div style={s.card}>
+          <div style={s.cardTitle}>Запросити з контактів</div>
+          {contacts.length === 0 ? (
+            <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+              Немає доступних контактів. Спочатку обміняйся контактами з кимось у пошуку.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {contacts
+                .filter(c => !group.members.find(m => m.user_id === c.user_id))
+                .map(c => (
+                  <div key={c.user_id} style={{
+                    display: 'flex', justifyContent: 'space-between',
+                    alignItems: 'center', padding: '10px 12px',
+                    background: 'var(--bg)', borderRadius: '8px',
+                    border: '1px solid var(--border)',
+                  }}>
+                    <div>
+                      <div style={{ fontWeight: '500', fontSize: '13px' }}>{c.name}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                        {c.contact_info}
+                      </div>
+                    </div>
+                    <button className="btn btn-primary"
+                      style={{ fontSize: '12px', padding: '5px 12px' }}
+                      onClick={() => handleInvite(c.user_id)}>
+                      Додати
+                    </button>
+                  </div>
+                ))
+              }
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Вхідні запити на вступ */}
       {group.pending_requests?.length > 0 && (
         <div style={s.card}>
           <div style={s.cardTitle}>
             Запити на вступ
-            <span style={{...s.badge(true), marginLeft:'8px'}}>
+            <span style={{ ...s.badge(true), marginLeft: '8px' }}>
               {group.pending_requests.length}
             </span>
           </div>
@@ -185,7 +239,7 @@ export default function GroupTab() {
             <div key={req.request_id} style={s.requestCard}>
               <div style={s.requestTop}>
                 <div style={s.memberAvatar}>{req.name?.[0] || '?'}</div>
-                <div style={{flex:1}}>
+                <div style={{ flex: 1 }}>
                   <div style={s.memberName}>{req.name}, {req.age}</div>
                   <div style={s.memberSub}>Запитує про вступ до групи</div>
                 </div>
@@ -208,11 +262,11 @@ export default function GroupTab() {
               </div>
 
               <div style={s.requestBtns}>
-                <button className="btn" style={{fontSize:'12px'}}
+                <button className="btn" style={{ fontSize: '12px' }}
                   onClick={() => handleRespond(req.request_id, false)}>
                   Відхилити
                 </button>
-                <button className="btn btn-primary" style={{fontSize:'12px'}}
+                <button className="btn btn-primary" style={{ fontSize: '12px' }}
                   onClick={() => handleRespond(req.request_id, true)}>
                   Прийняти до групи
                 </button>
@@ -227,8 +281,8 @@ export default function GroupTab() {
 
 function Field({ label, children }) {
   return (
-    <div style={{display:'flex', flexDirection:'column', gap:'6px'}}>
-      <label style={{fontSize:'12px', fontWeight:'500', color:'var(--color-text-secondary, #7A7090)'}}>{label}</label>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <label style={{ fontSize: '12px', fontWeight: '500', color: 'var(--color-text-secondary, #7A7090)' }}>{label}</label>
       {children}
     </div>
   )

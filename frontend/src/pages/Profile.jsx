@@ -512,21 +512,37 @@ function RequestsTab() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
       {requests.map(r => (
         <div key={r.request_id} style={requestCardStyle}>
-          <div>
-            <div style={{ fontWeight: '500' }}>Запит від користувача #{r.from_user_id}</div>
-            <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-              {new Date(r.created_at).toLocaleDateString('uk-UA')}
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '10px' }}>
+            <div style={{
+              width: '42px', height: '42px', borderRadius: '50%',
+              background: '#EDE8F8', color: '#534AB7',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: 'DM Serif Display, serif', fontSize: '18px', flexShrink: 0,
+            }}>
+              {r.name?.[0] || '?'}
+            </div>
+            <div>
+              <div style={{ fontWeight: '500', fontSize: '14px' }}>
+                {r.name || 'Без імені'}, {r.age}
+              </div>
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                {r.city} · {r.schedule === 'early_bird' ? '🌅 Жайворонок' : r.schedule === 'night_owl' ? '🦉 Сова' : ''}
+              </div>
+              {r.bio && (
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                  {r.bio.slice(0, 80)}{r.bio.length > 80 ? '...' : ''}
+                </div>
+              )}
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button className="btn btn-primary" style={{ fontSize: '13px', padding: '6px 14px' }}
-              onClick={() => respond(r.request_id, true)}>
-              Прийняти
-            </button>
+          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '10px' }}>
+            {new Date(r.created_at).toLocaleDateString('uk-UA')}
+          </div>
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
             <button className="btn" style={{ fontSize: '13px', padding: '6px 14px' }}
-              onClick={() => respond(r.request_id, false)}>
-              Відхилити
-            </button>
+              onClick={() => respond(r.request_id, false)}>Відхилити</button>
+            <button className="btn btn-primary" style={{ fontSize: '13px', padding: '6px 14px' }}
+              onClick={() => respond(r.request_id, true)}>Прийняти</button>
           </div>
         </div>
       ))}
