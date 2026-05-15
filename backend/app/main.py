@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
 from app.models import User, Profile, ContactRequest  
-from app.routers import auth, profiles, matching
-from app.routers import contacts  
+from app.routers import auth, profiles, matching, contacts, groups
+from app.models.group import Group, GroupMember, GroupRequest
 
 
 Base.metadata.create_all(bind=engine)
@@ -22,6 +22,7 @@ app.include_router(auth.router)
 app.include_router(profiles.router)
 app.include_router(matching.router)
 app.include_router(contacts.router)
+app.include_router(groups.router)
 
 @app.get("/")
 def root():

@@ -8,6 +8,7 @@ WEIGHTS = {
     "guests_frequency": 0.15, # частота гостей
     "pets":            0.15,  # сумісність з тваринами
     "smoking":         0.15,  # куріння
+    "children":        0.15,  # діти
 }
 
 def score_schedule(a: Profile, b: Profile) -> float:
@@ -49,6 +50,14 @@ def score_smoking(a: Profile, b: Profile) -> float:
         return 0.0
     return 1.0
 
+def score_children(a: Profile, b: Profile) -> float:
+    """аналогічно тваринам"""
+    if a.has_children and not b.ok_with_children:
+        return 0.0
+    if b.has_children and not a.ok_with_children:
+        return 0.0
+    return 1.0
+
 def calculate_compatibility(a: Profile, b: Profile) -> dict:
     """
     головна функція розрахунку сумісності:
@@ -61,6 +70,7 @@ def calculate_compatibility(a: Profile, b: Profile) -> dict:
         "guests_frequency": score_numeric(a.guests_frequency, b.guests_frequency),
         "pets":             score_pets(a, b),
         "smoking":          score_smoking(a, b),
+        "children":         score_children(a, b),
     }
 
     # зважена сума: S = Σ (wᵢ × sᵢ)

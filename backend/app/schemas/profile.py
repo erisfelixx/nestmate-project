@@ -26,6 +26,13 @@ class ProfileCreate(BaseModel):
     ok_with_pets: Optional[bool] = True
     smoking: Optional[bool] = False
     ok_with_smoking: Optional[bool] = False
+    has_children: Optional[bool] = False
+    ok_with_children: Optional[bool] = True
+
+    has_gas_appliances: Optional[bool] = False
+    floor: Optional[int] = None
+    has_shelter: Optional[bool] = False
+    shelter_type: Optional[str] = None  # "basement" / "parking" / "both"
 
     is_active_search: Optional[bool] = False
 

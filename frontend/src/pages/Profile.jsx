@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import GroupTab from '../components/GroupTab'
 import api from '../api/axios'
 
 
@@ -103,6 +104,7 @@ export default function Profile() {
             { key: 'profile', label: '👤 Мій профіль' },
             { key: 'requests', label: '📩 Вхідні запити' },
             { key: 'contacts', label: '✅ Контакти' },
+            { key: 'group', label: '👥 Моя група' },
           ].map(t => (
             <button
               key={t.key}
@@ -232,6 +234,57 @@ export default function Profile() {
                 </div>
               </Field>
 
+              {form.role === 'hosting' && (
+                <>
+                  <Field label="Поверх">
+                    <input
+                      style={styles.input}
+                      type="number"
+                      placeholder="3"
+                      value={form.floor || ''}
+                      onChange={e => set('floor', e.target.value ? parseInt(e.target.value) : null)}
+                    />
+                  </Field>
+
+                  <Field label="Інфраструктура будинку">
+                    <div style={styles.checkGrid}>
+                      <CheckCard
+                        label="Газова плита / колонка"
+                        emoji="🔥"
+                        checked={form.has_gas_appliances}
+                        onChange={v => set('has_gas_appliances', v)}
+                      />
+                      <CheckCard
+                        label="Є укриття у ЖК"
+                        emoji="🛡️"
+                        checked={form.has_shelter}
+                        onChange={v => set('has_shelter', v)}
+                      />
+                    </div>
+                  </Field>
+
+                  {form.has_shelter && (
+                    <Field label="Тип укриття">
+                      <div style={styles.radioGroup}>
+                        {[
+                          { val: 'basement', label: '🏚️ Підвал' },
+                          { val: 'parking', label: '🚗 Паркінг' },
+                          { val: 'both', label: '✅ Обидва' },
+                        ].map(opt => (
+                          <button
+                            key={opt.val}
+                            style={styles.radioBtn(form.shelter_type === opt.val)}
+                            onClick={() => set('shelter_type', opt.val)}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </Field>
+                  )}
+                </>
+              )}
+
               <div style={styles.grid2}>
                 <Field label="Бюджет від (грн/міс)">
                   <input
@@ -330,6 +383,19 @@ export default function Profile() {
                   checked={form.ok_with_smoking}
                   onChange={v => set('ok_with_smoking', v)}
                 />
+
+                <CheckCard
+                  label="Є діти"
+                  emoji="👶"
+                  checked={form.has_children}
+                  onChange={v => set('has_children', v)}
+                />
+                <CheckCard
+                  label="Можна з дітьми"
+                  emoji="🧸"
+                  checked={form.ok_with_children}
+                  onChange={v => set('ok_with_children', v)}
+                />
               </div>
             </Section>
 
@@ -350,6 +416,7 @@ export default function Profile() {
         )}
         {tab === 'requests' && <RequestsTab />}
         {tab === 'contacts' && <ContactsTab />}
+        {tab === 'group' && <GroupTab />}
       </div>
     </div>
   )

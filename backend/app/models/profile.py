@@ -35,6 +35,14 @@ class Profile(Base):
     ok_with_pets = Column(Boolean, default=True)
     smoking = Column(Boolean, default=False)
     ok_with_smoking = Column(Boolean, default=False)
+    has_children = Column(Boolean, default=False)
+    ok_with_children = Column(Boolean, default=True)
+
+    # Тільки для role = "hosting"
+    has_gas_appliances = Column(Boolean, default=False)  # газова плита/колонка
+    floor = Column(Integer, nullable=True)               # поверх
+    has_shelter = Column(Boolean, default=False)          # укриття (підвал/паркінг)
+    shelter_type = Column(String, nullable=True)          # "basement" / "parking" / "both"
 
     # Чи шукає співмешканця зараз
     is_active_search = Column(Boolean, default=False)

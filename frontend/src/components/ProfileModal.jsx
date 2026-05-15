@@ -33,10 +33,10 @@ export default function ProfileModal({ profile, onClose }) {
       >
         {/* Шапка */}
         <div style={styles.header}>
-            {profile.photo_url
-              ? <img src={profile.photo_url} style={{ width:'52px', height:'52px', borderRadius:'50%', objectFit:'cover' }} alt="Avatar" />
-              : <div style={styles.avatar}>{profile.name?.[0] || '?'}</div>
-            }
+          {profile.photo_url
+            ? <img src={profile.photo_url} style={{ width: '52px', height: '52px', borderRadius: '50%', objectFit: 'cover' }} alt="Avatar" />
+            : <div style={styles.avatar}>{profile.name?.[0] || '?'}</div>
+          }
           <div style={styles.headerInfo}>
             <h2 style={styles.name}>{profile.name}, {profile.age}</h2>
             <div style={styles.city}>{profile.city}</div>
@@ -76,6 +76,34 @@ export default function ProfileModal({ profile, onClose }) {
               <InfoItem label="Дата заселення" value={profile.move_in_date || '—'} />
             </div>
           </div>
+
+          {profile.role === 'hosting' && (
+            <>
+              <InfoItem
+                label="Поверх"
+                value={profile.floor ? `${profile.floor} поверх` : '—'}
+              />
+              <InfoItem
+                label="Газове обладнання"
+                value={profile.has_gas_appliances ? '🔥 Є' : '—'}
+              />
+              <InfoItem
+                label="Укриття"
+                value={
+                  profile.has_shelter
+                    ? profile.shelter_type === 'basement' ? '🏚️ Підвал'
+                      : profile.shelter_type === 'parking' ? '🚗 Паркінг'
+                        : profile.shelter_type === 'both' ? '✅ Підвал + Паркінг'
+                          : '✅ Є'
+                    : '—'
+                }
+              />
+            </>
+          )}
+          <InfoItem
+            label="Діти"
+            value={profile.has_children ? '👶 Є діти' : '—'}
+          />
 
           {/* Звички */}
           <div style={styles.block}>

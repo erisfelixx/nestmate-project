@@ -17,6 +17,8 @@ const DEFAULT_FILTERS = {
   budget_max: '',
   ok_with_pets: false,
   ok_with_smoking: false,
+  has_gas_appliances: false,
+  has_shelter: false,
 }
 
 export default function Search() {
@@ -26,9 +28,13 @@ export default function Search() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS)
   const [selected, setSelected] = useState(null)
   const [sortBy, setSortBy] = useState('compatibility')
+  const [groups, setGroups] = useState([])
+  const [showGroups, setShowGroups] = useState(true)
+  const [showIndividuals, setShowIndividuals] = useState(true)
 
   useEffect(() => {
     fetchMatches()
+    fetchGroups()
   }, [])
 
   const fetchMatches = async () => {
@@ -44,6 +50,13 @@ export default function Search() {
     }
   }
 
+  const fetchGroups = async () => {
+    try {
+      const res = await api.get('/groups/')
+      setGroups(res.data)
+    } catch { setGroups([]) }
+  }
+
   const setFilter = (key, val) =>
     setFilters(f => ({ ...f, [key]: val }))
 
@@ -57,6 +70,8 @@ export default function Search() {
       if (filters.budget_max && m.budget_max > parseInt(filters.budget_max)) return false
       if (filters.ok_with_pets && !m.ok_with_pets) return false
       if (filters.ok_with_smoking && !m.ok_with_smoking) return false
+      if (filters.has_gas_appliances && !m.has_gas_appliances) return false
+      if (filters.has_shelter && !m.has_shelter) return false
       return true
     })
     .sort((a, b) => {
@@ -83,6 +98,21 @@ export default function Search() {
             >
               {CITIES.map(c => <option key={c}>{c}</option>)}
             </select>
+          </FilterBlock>
+
+          <FilterBlock label="Показати">
+            <label style={styles.checkRow}>
+              <input type="checkbox" style={styles.checkbox}
+                checked={showIndividuals}
+                onChange={e => setShowIndividuals(e.target.checked)} />
+              Особи
+            </label>
+            <label style={styles.checkRow}>
+              <input type="checkbox" style={styles.checkbox}
+                checked={showGroups}
+                onChange={e => setShowGroups(e.target.checked)} />
+              Групи
+            </label>
           </FilterBlock>
 
           <FilterBlock label="Роль">
@@ -152,6 +182,21 @@ export default function Search() {
             </label>
           </FilterBlock>
 
+          <FilterBlock label="Для орендодавця">
+            <label style={styles.checkRow}>
+              <input type="checkbox" style={styles.checkbox}
+                checked={filters.has_gas_appliances}
+                onChange={e => setFilter('has_gas_appliances', e.target.checked)} />
+              Газове обладнання
+            </label>
+            <label style={styles.checkRow}>
+              <input type="checkbox" style={styles.checkbox}
+                checked={filters.has_shelter}
+                onChange={e => setFilter('has_shelter', e.target.checked)} />
+              Є укриття
+            </label>
+          </FilterBlock>
+
           <button
             className="btn"
             style={styles.resetBtn}
@@ -189,8 +234,8 @@ export default function Search() {
               {error === 'Спочатку створи профіль'
                 ? '👤 Спочатку заповни свій профіль, щоб бачити анкети.'
                 : error === 'Увімкни активний пошук у профілі'
-                ? '🔍 Увімкни активний пошук у профілі, щоб бачити інших.'
-                : error}
+                  ? '🔍 Увімкни активний пошук у профілі, щоб бачити інших.'
+                  : error}
             </div>
           )}
 
@@ -230,6 +275,28 @@ export default function Search() {
           )}
         </main>
       </div>
+
+      {/* Групи */}
+      {!loading && !error && (
+        <div style={styles.grid}>
+          {showIndividuals && filtered.map(match => (
+            <MatchCard key={match.profile_id} match={match}
+              onClick={() => setSelected(match)} />
+          ))}
+          {showGroups && groups.map(group => (
+            <GroupCard key={group.group_id} group={group}
+              onApply={async () => {
+                try {
+                  await api.post(`/groups/${group.group_id}/apply`)
+                  fetchGroups()
+                } catch (e) {
+                  alert(e.response?.data?.detail || 'Помилка')
+                }
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Спливаюче вікно профілю */}
       {selected && (
@@ -273,7 +340,7 @@ function MatchCard({ match, onClick }) {
       </div>
       <div style={styles.cardTop}>
         {match.photo_url
-          ? <img src={match.photo_url} style={{ width:'38px', height:'38px', borderRadius:'50%', objectFit:'cover' }} alt="Avatar" />
+          ? <img src={match.photo_url} style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }} alt="Avatar" />
           : <div style={styles.cardAvatar}>{match.name?.[0] || '?'}</div>
         }
         <div>
@@ -317,6 +384,47 @@ function FilterToggle({ options, value, onChange }) {
           {o.label}
         </button>
       ))}
+    </div>
+  )
+}
+
+function GroupCard({ group, onApply }) {
+  const compat = group.compatibility
+  const compatStyle = compat >= 75
+    ? { bg: '#EAF3DE', color: '#3B6D11' }
+    : { bg: '#FAEEDA', color: '#854F0B' }
+
+  return (
+    <div style={{ ...styles.card, borderLeft: '3px solid #7C5CBF' }}>
+      <div style={{ ...styles.compatBadge, background: '#EDE8F8', color: '#534AB7' }}>
+        👥 Група
+      </div>
+      <div style={{ ...styles.compatBadge, ...compatStyle, marginLeft: '6px' }}>
+        {compat}%
+      </div>
+
+      <div style={{ margin: '10px 0' }}>
+        <div style={styles.cardName}>{group.name}</div>
+        <div style={styles.cardCity}>
+          {group.city} · {group.current_size}/{group.target_size} учасники
+        </div>
+      </div>
+
+      <div style={styles.pills}>
+        {group.members.map(m => (
+          <span key={m.name} style={styles.pill}>{m.name}, {m.age}</span>
+        ))}
+      </div>
+
+      <div style={styles.cardFooter}>
+        <span style={styles.budget}>
+          до <strong>{group.budget_max ? `${group.budget_max} грн` : '—'}</strong>
+        </span>
+        <button className="btn btn-primary" style={{ fontSize: '11px', padding: '4px 12px' }}
+          onClick={onApply}>
+          Подати заявку
+        </button>
+      </div>
     </div>
   )
 }

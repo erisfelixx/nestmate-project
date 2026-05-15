@@ -46,6 +46,9 @@ def list_matches(
             "ok_with_pets": m["profile"].ok_with_pets,
             "smoking": m["profile"].smoking,
             "ok_with_smoking": m["profile"].ok_with_smoking,
+            "has_children": m["profile"].has_children,
+            "has_gas_appliances": m["profile"].has_gas_appliances,
+            "has_shelter": m["profile"].has_shelter,
             "compatibility": m["compatibility"],
             "breakdown": m["breakdown"]
         }
