@@ -2,13 +2,13 @@ from app.models.profile import Profile
 
 # ваги критеріїв (сума = 1.0)
 WEIGHTS = {
-    "schedule":        0.20,  # режим дня
-    "cleanliness":     0.20,  # чистота
-    "noise_level":     0.15,  # рівень шуму
-    "guests_frequency": 0.15, # частота гостей
-    "pets":            0.15,  # сумісність з тваринами
-    "smoking":         0.15,  # куріння
-    "children":        0.15,  # діти
+    "schedule":        0.15,  # режим дня
+    "cleanliness":     0.15,  # чистота
+    "noise_level":     0.12,  # рівень шуму
+    "guests_frequency": 0.08, # частота гостей
+    "pets":            0.10,  # сумісність з тваринами
+    "smoking":         0.20,  # куріння
+    "children":        0.20,  # діти
 }
 
 def score_schedule(a: Profile, b: Profile) -> float:
