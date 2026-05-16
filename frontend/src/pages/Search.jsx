@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import api from '../api/axios'
 import ProfileModal from '../components/ProfileModal'
+import GroupModal from '../components/GroupModal'
 
 const CITIES = [
   'Всі міста', 'Київ', 'Львів', 'Харків', 'Одеса', 'Дніпро',
@@ -31,6 +32,7 @@ export default function Search() {
   const [groups, setGroups] = useState([])
   const [showGroups, setShowGroups] = useState(true)
   const [showIndividuals, setShowIndividuals] = useState(true)
+  const [selectedGroup, setSelectedGroup] = useState(null)
 
   useEffect(() => {
     fetchMatches()
@@ -268,11 +270,6 @@ export default function Search() {
           {/* Картки */}
           {!loading && !error && (
             <>
-              {/* Тимчасовий лічильник для перевірки */}
-              <div style={{ fontWeight: 'bold', color: '#7C5CBF', marginBottom: '10px', fontSize: '13px' }}>
-                Знайдено: {showIndividuals ? filtered.length : 0} анкет та {showGroups ? groups.length : 0} груп
-              </div>
-
               <div style={styles.grid}>
                 {/* 1. Виводимо людей */}
                 {showIndividuals && filtered.map(match => (
@@ -290,17 +287,10 @@ export default function Search() {
                     <GroupCard
                       key={group.group_id}
                       group={group}
-                      onApply={async () => {
-                        try {
-                          await api.post(`/groups/${group.group_id}/apply`)
-                          fetchGroups()
-                          alert('Заявку до групи надіслано!')
-                        } catch (e) {
-                          alert(e.response?.data?.detail || 'Помилка')
-                        }
-                      }}
+                      onClick={() => setSelectedGroup(group)}
                     />
-                  ))}
+                  ))
+                }
               </div>
             </>
           )}
@@ -320,6 +310,14 @@ export default function Search() {
             ...selected,
           }}
           onClose={() => setSelected(null)}
+        />
+      )}
+
+      {/* Спливаюче вікно групи */}
+      {selectedGroup && (
+        <GroupModal
+          group={selectedGroup}
+          onClose={() => setSelectedGroup(null)}
         />
       )}
     </div>
@@ -397,14 +395,17 @@ function FilterToggle({ options, value, onChange }) {
   )
 }
 
-function GroupCard({ group, onApply }) {
+function GroupCard({ group, onClick }) {
   const compat = group.compatibility
   const compatStyle = compat >= 75
     ? { bg: '#EAF3DE', color: '#3B6D11' }
     : { bg: '#FAEEDA', color: '#854F0B' }
 
   return (
-    <div style={{ ...styles.card, borderLeft: '3px solid #7C5CBF' }}>
+    <div
+      style={{ ...styles.card, borderLeft: '3px solid #7C5CBF', cursor: 'pointer' }}
+      onClick={onClick}
+    >
       <div style={{ ...styles.compatBadge, background: '#EDE8F8', color: '#534AB7' }}>
         👥 Група
       </div>
@@ -429,10 +430,7 @@ function GroupCard({ group, onApply }) {
         <span style={styles.budget}>
           до <strong>{group.budget_max ? `${group.budget_max} грн` : '—'}</strong>
         </span>
-        <button className="btn btn-primary" style={{ fontSize: '11px', padding: '4px 12px' }}
-          onClick={onApply}>
-          Подати заявку
-        </button>
+        <span style={styles.viewHint}>Переглянути →</span>
       </div>
     </div>
   )

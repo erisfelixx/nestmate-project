@@ -11,6 +11,7 @@ export default function GroupTab() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [contacts, setContacts] = useState([])
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const CITIES = [
     'Київ', 'Львів', 'Харків', 'Одеса', 'Дніпро', 'Запоріжжя',
@@ -74,6 +75,16 @@ export default function GroupTab() {
       setTimeout(() => setSuccess(''), 3000)
     } catch (e) {
       setError(e.response?.data?.detail || 'Помилка')
+    }
+  }
+
+  const handleDelete = async () => {
+    try {
+      await api.delete('/groups/me')
+      setGroup(null)
+      setConfirmDelete(false)
+    } catch (e) {
+      setError(e.response?.data?.detail || 'Помилка видалення')
     }
   }
 
@@ -148,19 +159,72 @@ export default function GroupTab() {
       {/* Інфо про групу */}
       <div style={s.card}>
         <div style={s.cardHead}>
+          {/* Ліва частина: Назва та місто */}
           <div>
             <div style={s.cardTitle}>{group.name}</div>
             <div style={s.cardSub}>
               {group.city} · бюджет {group.budget_min}–{group.budget_max} грн
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <span style={s.badge(group.current_size < group.target_size)}>
-              {group.current_size} / {group.target_size}
-            </span>
-            <span style={s.statusBadge(group.is_active_search)}>
-              {group.is_active_search ? 'Активна' : 'Прихована'}
-            </span>
+
+          {/* Права частина: Спільний контейнер для бейджиків та кнопок */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'flex-end' }}>
+
+            {/* Бейджики */}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <span style={s.badge(group.current_size < group.target_size)}>
+                {group.current_size} / {group.target_size}
+              </span>
+              <span style={s.statusBadge(group.is_active_search)}>
+                {group.is_active_search ? 'Активна' : 'Прихована'}
+              </span>
+            </div>
+
+            {/* Кнопки керування */}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <button
+                className="btn"
+                style={{ fontSize: '12px' }}
+                onClick={() => {
+                  api.put(`/groups/me`, { ...group, is_active_search: !group.is_active_search })
+                    .then(fetchGroup)
+                    .catch(() => { })
+                }}
+              >
+                {group.is_active_search ? 'Деактивувати' : 'Активувати'}
+              </button>
+
+              {!confirmDelete ? (
+                <button
+                  className="btn"
+                  style={{ fontSize: '12px', color: '#C0392B', borderColor: '#C0392B' }}
+                  onClick={() => setConfirmDelete(true)}
+                >
+                  Видалити групу
+                </button>
+              ) : (
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                    Впевнені?
+                  </span>
+                  <button
+                    className="btn"
+                    style={{ fontSize: '12px', background: '#C0392B', color: '#fff', borderColor: '#C0392B' }}
+                    onClick={handleDelete}
+                  >
+                    Так, видалити
+                  </button>
+                  <button
+                    className="btn"
+                    style={{ fontSize: '12px' }}
+                    onClick={() => setConfirmDelete(false)}
+                  >
+                    Скасувати
+                  </button>
+                </div>
+              )}
+            </div>
+
           </div>
         </div>
 

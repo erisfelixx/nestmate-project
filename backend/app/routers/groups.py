@@ -12,6 +12,7 @@ from app.models.user import User
 from app.models.group import GroupMember, GroupRequest
 from pydantic import BaseModel
 from typing import Optional
+from app.models.group import GroupMember, GroupRequest
 
 router = APIRouter(prefix="/groups", tags=["groups"])
 
@@ -21,6 +22,9 @@ class GroupCreate(BaseModel):
     budget_min: Optional[int] = None
     budget_max: Optional[int] = None
     target_size: int = 3
+
+class GroupUpdate(BaseModel):
+    is_active_search: bool
 
 # cтворити групу
 @router.post("/", status_code=201)
@@ -172,3 +176,36 @@ def decline_request(
     if error:
         raise HTTPException(status_code=400, detail=error)
     return {"message": "Запит відхилено"}
+
+#видалити групу
+@router.delete("/me")
+def delete_group(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    group = get_my_group(db, current_user.id)
+    if not group:
+        raise HTTPException(status_code=404, detail="Група не знайдена")
+    if group.creator_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Тільки засновник може видалити групу")
+
+    # видаляємо учасників і запити
+    db.query(GroupMember).filter(GroupMember.group_id == group.id).delete()
+    db.query(GroupRequest).filter(GroupRequest.group_id == group.id).delete()
+    db.delete(group)
+    db.commit()
+    return {"message": "Групу видалено"}
+
+# деактивація групи
+@router.put("/me")
+def update_group(
+    data: GroupUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    group = get_my_group(db, current_user.id)
+    if not group:
+        raise HTTPException(status_code=404, detail="Група не знайдена")
+    group.is_active_search = data.is_active_search
+    db.commit()
+    return {"message": "Оновлено"}
