@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import api from '../api/axios'
+import ProfileModal from './ProfileModal'
 
 export default function GroupModal({ group, onClose }) {
+  const [selectedProfile, setSelectedProfile] = useState(null)
+  const [profileLoading, setProfileLoading] = useState(false)
   const [applied, setApplied] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -16,6 +19,20 @@ export default function GroupModal({ group, onClose }) {
       setError(e.response?.data?.detail || 'Помилка надсилання запиту')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleMemberClick = async (userId) => {
+    if (!userId) return // Захист від порожнього ID
+    setProfileLoading(true)
+    try {
+      const res = await api.get(`/profiles/user/${userId}`)
+      setSelectedProfile({ ...res.data, user_id: userId })
+    } catch {
+      // якщо профіль не знайдено, можна нічого не робити або вивести помилку
+      console.error("Профіль не знайдено")
+    } finally {
+      setProfileLoading(false)
     }
   }
 
@@ -71,19 +88,37 @@ export default function GroupModal({ group, onClose }) {
               </span>
             </div>
           </div>
+          {group.description && (
+            <div style={s.block}>
+              <div style={s.blockLabel}>Про групу</div>
+              <p style={{ fontSize: '14px', lineHeight: 1.6, color: 'var(--text)', margin: 0 }}>
+                {group.description}
+              </p>
+            </div>
+          )}
 
           {/* Учасники */}
           <div style={s.block}>
             <div style={s.blockLabel}>Учасники</div>
             <div style={s.membersGrid}>
+
               {group.members.map((m, i) => (
-                <div key={i} style={s.memberCard}>
+                <div
+                  key={i}
+                  style={{ ...s.memberCard, cursor: 'pointer' }}
+                  onClick={() => handleMemberClick(m.user_id)}
+                >
                   <div style={s.memberAvatar}>{m.name?.[0] || '?'}</div>
                   <div style={s.memberName}>{m.name}, {m.age}</div>
+                  <div style={{ fontSize: '10px', color: '#7C5CBF', marginTop: '4px' }}>
+                    {profileLoading ? '...' : 'переглянути →'}
+                  </div>
                 </div>
               ))}
-              {Array.from({length: spotsLeft}).map((_, i) => (
-                <div key={i} style={s.emptySlot}>
+
+              {/* Порожні слоти */}
+              {Array.from({ length: spotsLeft }).map((_, i) => (
+                <div key={`empty-${i}`} style={s.emptySlot}>
                   <div style={s.emptyIcon}>+</div>
                   <div style={s.emptyText}>Вільне місце</div>
                 </div>
@@ -123,13 +158,21 @@ export default function GroupModal({ group, onClose }) {
               disabled={loading || spotsLeft === 0}
             >
               {loading ? 'Надсилання...' :
-               spotsLeft === 0 ? 'Група заповнена' :
-               '📩 Подати заявку до групи'}
+                spotsLeft === 0 ? 'Група заповнена' :
+                  '📩 Подати заявку до групи'}
             </button>
           )}
 
         </div>
       </div>
+
+      {selectedProfile && (
+        <ProfileModal
+          profile={selectedProfile}
+          onClose={() => setSelectedProfile(null)}
+          zIndex={200}
+        />
+      )}
     </div>
   )
 }

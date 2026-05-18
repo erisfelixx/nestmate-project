@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react'
 import api from '../api/axios'
+import ProfileModal from './ProfileModal'
 
 export default function GroupTab() {
   const [group, setGroup] = useState(null)
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
   const [form, setForm] = useState({
-    name: '', city: '', budget_min: '', budget_max: '', target_size: 3
+    name: '', city: '', budget_min: '', budget_max: '', target_size: 3, description: ''
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [contacts, setContacts] = useState([])
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [viewProfile, setViewProfile] = useState(null)
+  const [profileLoading, setProfileLoading] = useState(false)
 
   const CITIES = [
     'Київ', 'Львів', 'Харків', 'Одеса', 'Дніпро', 'Запоріжжя',
@@ -88,6 +91,18 @@ export default function GroupTab() {
     }
   }
 
+  const handleViewProfile = async (userId) => {
+    setProfileLoading(true)
+    try {
+      const res = await api.get(`/profiles/user/${userId}`)
+      setViewProfile({ ...res.data, user_id: userId })
+    } catch {
+      setError('Не вдалося завантажити профіль')
+    } finally {
+      setProfileLoading(false)
+    }
+  }
+
   if (loading) return <div style={s.empty}>Завантаження...</div>
 
   // форма створення групи
@@ -110,6 +125,14 @@ export default function GroupTab() {
         <Field label="Назва групи">
           <input style={s.input} placeholder="Шукаємо третього у Києві"
             value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+        </Field>
+        <Field label="Опис групи">
+          <textarea
+            style={{ ...s.input, resize: 'vertical', minHeight: '70px' }}
+            placeholder="Розкажіть про себе та умови проживання..."
+            value={form.description}
+            onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+          />
         </Field>
         <div style={s.grid2}>
           <Field label="Місто">
@@ -306,6 +329,14 @@ export default function GroupTab() {
                 <div style={{ flex: 1 }}>
                   <div style={s.memberName}>{req.name}, {req.age}</div>
                   <div style={s.memberSub}>Запитує про вступ до групи</div>
+                  <button
+                    className="btn"
+                    style={{ fontSize: '11px', padding: '3px 10px', marginTop: '5px' }}
+                    onClick={() => handleViewProfile(req.user_id)}
+                    disabled={profileLoading}
+                  >
+                    Переглянути анкету →
+                  </button>
                 </div>
                 <div style={s.compatCircle(req.compatibility)}>
                   {req.compatibility}%
@@ -338,6 +369,13 @@ export default function GroupTab() {
             </div>
           ))}
         </div>
+      )}
+      {viewProfile && (
+        <ProfileModal
+          profile={viewProfile}
+          onClose={() => setViewProfile(null)}
+          zIndex={200}
+        />
       )}
     </div>
   )

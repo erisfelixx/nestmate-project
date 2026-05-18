@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import api from '../api/axios'
 
-export default function ProfileModal({ profile, onClose }) {
+export default function ProfileModal({ profile, onClose, zIndex = 100 }) {
   const [requested, setRequested] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -25,7 +25,7 @@ export default function ProfileModal({ profile, onClose }) {
     : { bg: '#FEF3E2', color: '#854F0B' }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" style={{ zIndex }} onClick={onClose}>
       <div
         className="modal"
         style={styles.modal}
@@ -74,36 +74,36 @@ export default function ProfileModal({ profile, onClose }) {
               <InfoItem label="Роль" value={profile.role === 'looking' ? '🔍 Шукає кімнату' : '🏠 Здає кімнату'} />
               <InfoItem label="Бюджет" value={profile.budget_min && profile.budget_max ? `${profile.budget_min} – ${profile.budget_max} грн` : '—'} />
               <InfoItem label="Дата заселення" value={profile.move_in_date || '—'} />
+              
+              {profile.role === 'hosting' && (
+                <>
+                  <InfoItem
+                    label="Поверх"
+                    value={profile.floor ? `${profile.floor} поверх` : '—'}
+                  />
+                  <InfoItem
+                    label="Газове обладнання"
+                    value={profile.has_gas_appliances ? '🔥 Є' : '—'}
+                  />
+                  <InfoItem
+                    label="Укриття"
+                    value={
+                      profile.has_shelter
+                        ? profile.shelter_type === 'basement' ? '🏚️ Підвал'
+                          : profile.shelter_type === 'parking' ? '🚗 Паркінг'
+                            : profile.shelter_type === 'both' ? '✅ Підвал + Паркінг'
+                              : '✅ Є'
+                        : '—'
+                    }
+                  />
+                </>
+              )}
+              <InfoItem
+                label="Діти"
+                value={profile.has_children ? '👶 Є діти' : '—'}
+              />
             </div>
           </div>
-
-          {profile.role === 'hosting' && (
-            <>
-              <InfoItem
-                label="Поверх"
-                value={profile.floor ? `${profile.floor} поверх` : '—'}
-              />
-              <InfoItem
-                label="Газове обладнання"
-                value={profile.has_gas_appliances ? '🔥 Є' : '—'}
-              />
-              <InfoItem
-                label="Укриття"
-                value={
-                  profile.has_shelter
-                    ? profile.shelter_type === 'basement' ? '🏚️ Підвал'
-                      : profile.shelter_type === 'parking' ? '🚗 Паркінг'
-                        : profile.shelter_type === 'both' ? '✅ Підвал + Паркінг'
-                          : '✅ Є'
-                    : '—'
-                }
-              />
-            </>
-          )}
-          <InfoItem
-            label="Діти"
-            value={profile.has_children ? '👶 Є діти' : '—'}
-          />
 
           {/* Звички */}
           <div style={styles.block}>

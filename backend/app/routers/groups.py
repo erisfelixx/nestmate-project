@@ -22,9 +22,11 @@ class GroupCreate(BaseModel):
     budget_min: Optional[int] = None
     budget_max: Optional[int] = None
     target_size: int = 3
+    description: Optional[str] = None
 
 class GroupUpdate(BaseModel):
     is_active_search: bool
+    description: Optional[str] = None
 
 # cтворити групу
 @router.post("/", status_code=201)
@@ -35,7 +37,8 @@ def create_my_group(
 ):
     group, error = create_group(
         db, current_user.id, data.name, data.city,
-        data.budget_min, data.budget_max, data.target_size
+        data.budget_min, data.budget_max, data.target_size,
+        data.description
     )
     if error:
         raise HTTPException(status_code=400, detail=error)
@@ -90,6 +93,7 @@ def get_my_group_info(
         "target_size": group.target_size,
         "is_active_search": group.is_active_search,
         "current_size": len(group.members),
+        "description": group.description,
         "members": members_info,
         "pending_requests": pending_info
     }
@@ -134,6 +138,7 @@ def list_groups(
             "budget_max": group.budget_max,
             "target_size": group.target_size,
             "current_size": len(group.members),
+            "description": group.description,
             "members": members_info,
             "compatibility": compat["total"],
             "breakdown_per_member": compat["breakdown_per_member"]
@@ -207,5 +212,7 @@ def update_group(
     if not group:
         raise HTTPException(status_code=404, detail="Група не знайдена")
     group.is_active_search = data.is_active_search
+    if data.description is not None:
+        group.description = data.description
     db.commit()
     return {"message": "Оновлено"}

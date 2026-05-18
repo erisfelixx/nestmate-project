@@ -4,7 +4,7 @@ from app.models.profile import Profile
 from app.ai.scoring import calculate_compatibility
 
 def create_group(db: Session, creator_id: int, name: str, city: str,
-                 budget_min: int, budget_max: int, target_size: int):
+                 budget_min: int, budget_max: int, target_size: int, description: str = None):
     #один користувач — одна група
     existing = db.query(GroupMember).filter(
         GroupMember.user_id == creator_id
@@ -15,7 +15,8 @@ def create_group(db: Session, creator_id: int, name: str, city: str,
     group = Group(
         name=name, city=city,
         budget_min=budget_min, budget_max=budget_max,
-        target_size=target_size, creator_id=creator_id
+        target_size=target_size, creator_id=creator_id,
+        description=description
     )
     db.add(group)
     db.flush()

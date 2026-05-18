@@ -282,7 +282,11 @@ export default function Search() {
 
                 {/* 2. Виводимо групи */}
                 {showGroups && groups
-                  .filter(g => filters.city === 'Всі міста' || g.city === filters.city)
+                  .filter(g => {
+                    if (filters.city !== 'Всі міста' && g.city !== filters.city) return false
+                    if (filters.budget_max && g.budget_max > parseInt(filters.budget_max)) return false
+                    return true
+                  })
                   .map(group => (
                     <GroupCard
                       key={group.group_id}

@@ -80,3 +80,15 @@ def list_active_profiles(
     current_user: User = Depends(get_current_user)
 ):
     return get_active_profiles(db, skip, limit)
+
+#Oтримати профіль по user_id
+@router.get("/user/{user_id}", response_model=ProfileOut)
+def get_profile_by_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    profile = get_profile_by_user_id(db, user_id)
+    if not profile:
+        raise HTTPException(status_code=404, detail="Профіль не знайдено")
+    return profile

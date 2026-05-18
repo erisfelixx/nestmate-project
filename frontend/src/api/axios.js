@@ -5,6 +5,12 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' }
 })
 
+// функція для отримання профілю по user_id
+export const fetchProfile = async (userId) => {
+  const res = await api.get(`/profiles/user/${userId}`)
+  return res.data
+}
+
 //автоматично додає токен до кожного запиту
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')

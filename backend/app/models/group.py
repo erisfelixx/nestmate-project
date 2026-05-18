@@ -15,6 +15,7 @@ class Group(Base):
     creator_id = Column(Integer, ForeignKey("users.id"))
     is_active_search = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    description = Column(String, nullable=True)
 
     members = relationship("GroupMember", back_populates="group")
     requests = relationship("GroupRequest", back_populates="group")
