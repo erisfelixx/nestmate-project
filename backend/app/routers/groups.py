@@ -127,6 +127,7 @@ def list_groups(
         for m in group.members:
             profile = get_profile_by_user_id(db, m.user_id)
             members_info.append({
+                "user_id": m.user_id,
                 "name": profile.name if profile else None,
                 "age": profile.age if profile else None,
             })

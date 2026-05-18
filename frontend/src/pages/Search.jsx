@@ -24,14 +24,17 @@ const DEFAULT_FILTERS = {
 
 export default function Search() {
   const [matches, setMatches] = useState([])
+  const [groups, setGroups] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  
   const [filters, setFilters] = useState(DEFAULT_FILTERS)
-  const [selected, setSelected] = useState(null)
   const [sortBy, setSortBy] = useState('compatibility')
-  const [groups, setGroups] = useState([])
-  const [showGroups, setShowGroups] = useState(true)
-  const [showIndividuals, setShowIndividuals] = useState(true)
+  
+  // ДОДАНО: Стан для вкладок замість чекбоксів
+  const [activeTab, setActiveTab] = useState('individuals') // 'individuals' або 'groups'
+
+  const [selected, setSelected] = useState(null)
   const [selectedGroup, setSelectedGroup] = useState(null)
 
   useEffect(() => {
@@ -55,7 +58,6 @@ export default function Search() {
   const fetchGroups = async () => {
     try {
       const res = await api.get('/groups/')
-      console.log('Групи:', res.data)
       setGroups(res.data)
     } catch (e) {
       console.log('Помилка груп:', e.response?.data)
@@ -66,8 +68,8 @@ export default function Search() {
   const setFilter = (key, val) =>
     setFilters(f => ({ ...f, [key]: val }))
 
-  // Фільтрація на фронтенді
-  const filtered = matches
+  // 1. ФІЛЬТРАЦІЯ ОСІБ
+  const filteredMatches = matches
     .filter(m => {
       if (filters.city !== 'Всі міста' && m.city !== filters.city) return false
       if (filters.gender && m.gender !== filters.gender) return false
@@ -87,9 +89,26 @@ export default function Search() {
       return 0
     })
 
+  // 2. ФІЛЬТРАЦІЯ ГРУП
+  const filteredGroups = groups
+    .filter(g => {
+      if (filters.city !== 'Всі міста' && g.city !== filters.city) return false
+      if (filters.budget_max && g.budget_max > parseInt(filters.budget_max)) return false
+      if (filters.role === 'hosting') return false // Орендодавці не шукають групи
+      return true
+    })
+    .sort((a, b) => {
+      if (sortBy === 'compatibility') return (b.compatibility || 0) - (a.compatibility || 0)
+      if (sortBy === 'budget_asc') return (a.budget_max || 0) - (b.budget_max || 0)
+      if (sortBy === 'budget_desc') return (b.budget_max || 0) - (a.budget_max || 0)
+      return 0
+    })
+
+  // Визначаємо, які дані показувати зараз
+  const activeData = activeTab === 'individuals' ? filteredMatches : filteredGroups
+
   return (
     <div style={styles.root}>
-
       <div style={styles.layout}>
 
         {/* САЙДБАР — фільтри */}
@@ -106,57 +125,7 @@ export default function Search() {
             </select>
           </FilterBlock>
 
-          <FilterBlock label="Показати">
-            <label style={styles.checkRow}>
-              <input type="checkbox" style={styles.checkbox}
-                checked={showIndividuals}
-                onChange={e => setShowIndividuals(e.target.checked)} />
-              Особи
-            </label>
-            <label style={styles.checkRow}>
-              <input type="checkbox" style={styles.checkbox}
-                checked={showGroups}
-                onChange={e => setShowGroups(e.target.checked)} />
-              Групи
-            </label>
-          </FilterBlock>
-
-          <FilterBlock label="Роль">
-            <FilterToggle
-              options={[
-                { val: '', label: 'Всі' },
-                { val: 'looking', label: '🔍 Шукає' },
-                { val: 'hosting', label: '🏠 Здає' },
-              ]}
-              value={filters.role}
-              onChange={v => setFilter('role', v)}
-            />
-          </FilterBlock>
-
-          <FilterBlock label="Стать">
-            <FilterToggle
-              options={[
-                { val: '', label: 'Будь-яка' },
-                { val: 'female', label: 'Жінка' },
-                { val: 'male', label: 'Чоловік' },
-              ]}
-              value={filters.gender}
-              onChange={v => setFilter('gender', v)}
-            />
-          </FilterBlock>
-
-          <FilterBlock label="Режим дня">
-            <FilterToggle
-              options={[
-                { val: '', label: 'Будь-який' },
-                { val: 'early_bird', label: '🌅 Жайворонок' },
-                { val: 'night_owl', label: '🦉 Сова' },
-              ]}
-              value={filters.schedule}
-              onChange={v => setFilter('schedule', v)}
-            />
-          </FilterBlock>
-
+          {/* Загальний фільтр для обох вкладок */}
           <FilterBlock label="Бюджет до (грн)">
             <input
               style={styles.input}
@@ -167,41 +136,82 @@ export default function Search() {
             />
           </FilterBlock>
 
-          <FilterBlock label="Додатково">
-            <label style={styles.checkRow}>
-              <input
-                type="checkbox"
-                style={styles.checkbox}
-                checked={filters.ok_with_pets}
-                onChange={e => setFilter('ok_with_pets', e.target.checked)}
-              />
-              Можна з тваринами
-            </label>
-            <label style={styles.checkRow}>
-              <input
-                type="checkbox"
-                style={styles.checkbox}
-                checked={filters.ok_with_smoking}
-                onChange={e => setFilter('ok_with_smoking', e.target.checked)}
-              />
-              Дозволено курити
-            </label>
-          </FilterBlock>
+          {/* Фільтри ТІЛЬКИ для індивідуальних анкет */}
+          {activeTab === 'individuals' && (
+            <>
+              <FilterBlock label="Роль">
+                <FilterToggle
+                  options={[
+                    { val: '', label: 'Всі' },
+                    { val: 'looking', label: '🔍 Шукає' },
+                    { val: 'hosting', label: '🏠 Здає' },
+                  ]}
+                  value={filters.role}
+                  onChange={v => setFilter('role', v)}
+                />
+              </FilterBlock>
 
-          <FilterBlock label="Для орендодавця">
-            <label style={styles.checkRow}>
-              <input type="checkbox" style={styles.checkbox}
-                checked={filters.has_gas_appliances}
-                onChange={e => setFilter('has_gas_appliances', e.target.checked)} />
-              Газове обладнання
-            </label>
-            <label style={styles.checkRow}>
-              <input type="checkbox" style={styles.checkbox}
-                checked={filters.has_shelter}
-                onChange={e => setFilter('has_shelter', e.target.checked)} />
-              Є укриття
-            </label>
-          </FilterBlock>
+              <FilterBlock label="Стать">
+                <FilterToggle
+                  options={[
+                    { val: '', label: 'Будь-яка' },
+                    { val: 'female', label: 'Жінка' },
+                    { val: 'male', label: 'Чоловік' },
+                  ]}
+                  value={filters.gender}
+                  onChange={v => setFilter('gender', v)}
+                />
+              </FilterBlock>
+
+              <FilterBlock label="Режим дня">
+                <FilterToggle
+                  options={[
+                    { val: '', label: 'Будь-який' },
+                    { val: 'early_bird', label: '🌅 Жайворонок' },
+                    { val: 'night_owl', label: '🦉 Сова' },
+                  ]}
+                  value={filters.schedule}
+                  onChange={v => setFilter('schedule', v)}
+                />
+              </FilterBlock>
+
+              <FilterBlock label="Додатково">
+                <label style={styles.checkRow}>
+                  <input
+                    type="checkbox"
+                    style={styles.checkbox}
+                    checked={filters.ok_with_pets}
+                    onChange={e => setFilter('ok_with_pets', e.target.checked)}
+                  />
+                  Можна з тваринами
+                </label>
+                <label style={styles.checkRow}>
+                  <input
+                    type="checkbox"
+                    style={styles.checkbox}
+                    checked={filters.ok_with_smoking}
+                    onChange={e => setFilter('ok_with_smoking', e.target.checked)}
+                  />
+                  Дозволено курити
+                </label>
+              </FilterBlock>
+
+              <FilterBlock label="Для орендодавця">
+                <label style={styles.checkRow}>
+                  <input type="checkbox" style={styles.checkbox}
+                    checked={filters.has_gas_appliances}
+                    onChange={e => setFilter('has_gas_appliances', e.target.checked)} />
+                  Газове обладнання
+                </label>
+                <label style={styles.checkRow}>
+                  <input type="checkbox" style={styles.checkbox}
+                    checked={filters.has_shelter}
+                    onChange={e => setFilter('has_shelter', e.target.checked)} />
+                  Є укриття
+                </label>
+              </FilterBlock>
+            </>
+          )}
 
           <button
             className="btn"
@@ -215,10 +225,26 @@ export default function Search() {
         {/* ОСНОВНА ЧАСТИНА */}
         <main style={styles.main}>
 
-          {/* Шапка */}
+          {/* ВКЛАДКИ (Tabs) */}
+          <div style={styles.tabsContainer}>
+            <button
+              style={styles.tab(activeTab === 'individuals')}
+              onClick={() => setActiveTab('individuals')}
+            >
+              👤 Шукаю людей
+            </button>
+            <button
+              style={styles.tab(activeTab === 'groups')}
+              onClick={() => setActiveTab('groups')}
+            >
+              👥 Шукаю групи
+            </button>
+          </div>
+
+          {/* Шапка результатів */}
           <div style={styles.mainHeader}>
             <h1 style={styles.mainTitle}>
-              {loading ? 'Завантаження...' : `${filtered.length} анкет`}
+              {loading ? 'Завантаження...' : `${activeData.length} результатів`}
               {filters.city !== 'Всі міста' && (
                 <span style={styles.cityTag}> · {filters.city}</span>
               )}
@@ -249,19 +275,16 @@ export default function Search() {
           {loading && (
             <div style={styles.emptyState}>
               <div style={styles.emptyIcon}>⏳</div>
-              <p>Завантаження анкет...</p>
+              <p>Завантаження...</p>
             </div>
           )}
 
           {/* Стан: порожньо */}
-          {!loading && !error && filtered.length === 0 && (
+          {!loading && !error && activeData.length === 0 && (
             <div style={styles.emptyState}>
               <div style={styles.emptyIcon}>🔍</div>
-              <p style={styles.emptyText}>За цими фільтрами нікого не знайдено</p>
-              <button
-                className="btn"
-                onClick={() => setFilters(DEFAULT_FILTERS)}
-              >
+              <p style={styles.emptyText}>За цими фільтрами нічого не знайдено</p>
+              <button className="btn" onClick={() => setFilters(DEFAULT_FILTERS)}>
                 Скинути фільтри
               </button>
             </div>
@@ -269,34 +292,24 @@ export default function Search() {
 
           {/* Картки */}
           {!loading && !error && (
-            <>
-              <div style={styles.grid}>
-                {/* 1. Виводимо людей */}
-                {showIndividuals && filtered.map(match => (
-                  <MatchCard
-                    key={match.profile_id}
-                    match={match}
-                    onClick={() => setSelected(match)}
-                  />
-                ))}
-
-                {/* 2. Виводимо групи */}
-                {showGroups && groups
-                  .filter(g => {
-                    if (filters.city !== 'Всі міста' && g.city !== filters.city) return false
-                    if (filters.budget_max && g.budget_max > parseInt(filters.budget_max)) return false
-                    return true
-                  })
-                  .map(group => (
+            <div style={styles.grid}>
+              {activeTab === 'individuals'
+                ? activeData.map(match => (
+                    <MatchCard
+                      key={match.profile_id}
+                      match={match}
+                      onClick={() => setSelected(match)}
+                    />
+                  ))
+                : activeData.map(group => (
                     <GroupCard
                       key={group.group_id}
                       group={group}
                       onClick={() => setSelectedGroup(group)}
                     />
                   ))
-                }
-              </div>
-            </>
+              }
+            </div>
           )}
         </main>
       </div>
@@ -543,6 +556,24 @@ const styles = {
   main: {
     padding: '1.5rem',
   },
+  tabsContainer: {
+    display: 'flex',
+    gap: '12px',
+    marginBottom: '1.5rem',
+    borderBottom: '1px solid var(--border)',
+    paddingBottom: '10px',
+  },
+  tab: (active) => ({
+    background: active ? 'var(--accent)' : 'transparent',
+    color: active ? '#fff' : 'var(--text-secondary)',
+    border: `1px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
+    padding: '8px 20px',
+    borderRadius: '20px',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+  }),
   mainHeader: {
     display: 'flex',
     justifyContent: 'space-between',
