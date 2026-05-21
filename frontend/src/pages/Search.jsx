@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import api from '../api/axios'
 import ProfileModal from '../components/ProfileModal'
 import GroupModal from '../components/GroupModal'
+import { Search as SearchIcon, User, Users, SlidersHorizontal, X } from 'lucide-react'
 
 const CITIES = [
   'Всі міста', 'Київ', 'Львів', 'Харків', 'Одеса', 'Дніпро',
@@ -31,8 +32,8 @@ export default function Search() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS)
   const [sortBy, setSortBy] = useState('compatibility')
   
-  // ДОДАНО: Стан для вкладок замість чекбоксів
   const [activeTab, setActiveTab] = useState('individuals') // 'individuals' або 'groups'
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false) // Стан для мобільної шторки
 
   const [selected, setSelected] = useState(null)
   const [selectedGroup, setSelectedGroup] = useState(null)
@@ -68,7 +69,6 @@ export default function Search() {
   const setFilter = (key, val) =>
     setFilters(f => ({ ...f, [key]: val }))
 
-  // 1. ФІЛЬТРАЦІЯ ОСІБ
   const filteredMatches = matches
     .filter(m => {
       if (filters.city !== 'Всі міста' && m.city !== filters.city) return false
@@ -89,12 +89,11 @@ export default function Search() {
       return 0
     })
 
-  // 2. ФІЛЬТРАЦІЯ ГРУП
   const filteredGroups = groups
     .filter(g => {
       if (filters.city !== 'Всі міста' && g.city !== filters.city) return false
       if (filters.budget_max && g.budget_max > parseInt(filters.budget_max)) return false
-      if (filters.role === 'hosting') return false // Орендодавці не шукають групи
+      if (filters.role === 'hosting') return false 
       return true
     })
     .sort((a, b) => {
@@ -104,16 +103,30 @@ export default function Search() {
       return 0
     })
 
-  // Визначаємо, які дані показувати зараз
   const activeData = activeTab === 'individuals' ? filteredMatches : filteredGroups
 
   return (
     <div style={styles.root}>
-      <div style={styles.layout}>
+      {/* Затемнення фону при відкритій шторці */}
+      {isMobileFiltersOpen && (
+        <div className="sidebar-backdrop" onClick={() => setIsMobileFiltersOpen(false)} />
+      )}
+
+      <div className="search-layout">
 
         {/* САЙДБАР — фільтри */}
-        <aside style={styles.sidebar}>
-          <div style={styles.sidebarTitle}>Фільтри</div>
+        <aside className={`search-sidebar ${isMobileFiltersOpen ? 'open' : ''}`} style={styles.sidebar}>
+          <div style={styles.sidebarHeader}>
+            <div style={styles.sidebarTitle}>Фільтри</div>
+            {/* Кнопка закриття (видно тільки на моб) */}
+            <button 
+              className="btn" 
+              style={{ padding: '4px', border: 'none', display: 'flex' }}
+              onClick={() => setIsMobileFiltersOpen(false)}
+            >
+              <X size={20} className="mobile-close-icon" />
+            </button>
+          </div>
 
           <FilterBlock label="Місто">
             <select
@@ -125,7 +138,6 @@ export default function Search() {
             </select>
           </FilterBlock>
 
-          {/* Загальний фільтр для обох вкладок */}
           <FilterBlock label="Бюджет до (грн)">
             <input
               style={styles.input}
@@ -136,7 +148,6 @@ export default function Search() {
             />
           </FilterBlock>
 
-          {/* Фільтри ТІЛЬКИ для індивідуальних анкет */}
           {activeTab === 'individuals' && (
             <>
               <FilterBlock label="Роль">
@@ -216,7 +227,10 @@ export default function Search() {
           <button
             className="btn"
             style={styles.resetBtn}
-            onClick={() => setFilters(DEFAULT_FILTERS)}
+            onClick={() => {
+              setFilters(DEFAULT_FILTERS);
+              setIsMobileFiltersOpen(false);
+            }}
           >
             Скинути фільтри
           </button>
@@ -225,26 +239,32 @@ export default function Search() {
         {/* ОСНОВНА ЧАСТИНА */}
         <main style={styles.main}>
 
+          {/* Мобільна кнопка виклику фільтрів */}
+          <button className="mobile-filter-btn" onClick={() => setIsMobileFiltersOpen(true)}>
+            <SlidersHorizontal size={18} />
+            Фільтри та сортування
+          </button>
+
           {/* ВКЛАДКИ (Tabs) */}
           <div style={styles.tabsContainer}>
             <button
               style={styles.tab(activeTab === 'individuals')}
               onClick={() => setActiveTab('individuals')}
             >
-              👤 Шукаю людей
+              <User size={16} /> Шукаю людей
             </button>
             <button
               style={styles.tab(activeTab === 'groups')}
               onClick={() => setActiveTab('groups')}
             >
-              👥 Шукаю групи
+              <Users size={16} /> Шукаю групи
             </button>
           </div>
 
           {/* Шапка результатів */}
           <div style={styles.mainHeader}>
             <h1 style={styles.mainTitle}>
-              {loading ? 'Завантаження...' : `${activeData.length} результатів`}
+              {loading ? 'Шукаємо...' : `${activeData.length} результатів`}
               {filters.city !== 'Всі міста' && (
                 <span style={styles.cityTag}> · {filters.city}</span>
               )}
@@ -264,25 +284,26 @@ export default function Search() {
           {error && (
             <div style={styles.errorBox}>
               {error === 'Спочатку створи профіль'
-                ? '👤 Спочатку заповни свій профіль, щоб бачити анкети.'
+                ? 'Спочатку заповни свій профіль, щоб бачити анкети.'
                 : error === 'Увімкни активний пошук у профілі'
-                  ? '🔍 Увімкни активний пошук у профілі, щоб бачити інших.'
+                  ? 'Увімкни активний пошук у профілі, щоб бачити інших.'
                   : error}
             </div>
           )}
 
-          {/* Стан: завантаження */}
-          {loading && (
-            <div style={styles.emptyState}>
-              <div style={styles.emptyIcon}>⏳</div>
-              <p>Завантаження...</p>
+          {/* Стан: SKELETON LOADERS (Замість тексту завантаження) */}
+          {loading && !error && (
+            <div style={styles.grid}>
+              {[...Array(6)].map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
             </div>
           )}
 
           {/* Стан: порожньо */}
           {!loading && !error && activeData.length === 0 && (
             <div style={styles.emptyState}>
-              <div style={styles.emptyIcon}>🔍</div>
+              <SearchIcon size={48} color="var(--border)" strokeWidth={1.5} />
               <p style={styles.emptyText}>За цими фільтрами нічого не знайдено</p>
               <button className="btn" onClick={() => setFilters(DEFAULT_FILTERS)}>
                 Скинути фільтри
@@ -314,7 +335,6 @@ export default function Search() {
         </main>
       </div>
 
-      {/* Спливаюче вікно профілю */}
       {selected && (
         <ProfileModal
           profile={{
@@ -330,7 +350,6 @@ export default function Search() {
         />
       )}
 
-      {/* Спливаюче вікно групи */}
       {selectedGroup && (
         <GroupModal
           group={selectedGroup}
@@ -342,6 +361,30 @@ export default function Search() {
 }
 
 // ── Допоміжні компоненти ─────────────────────────────────────────
+
+// Скелетна картка завантаження
+function SkeletonCard() {
+  return (
+    <div style={{ ...styles.card, borderColor: 'transparent', boxShadow: 'var(--shadow)' }}>
+      <div className="skeleton-box" style={{ width: '40px', height: '18px', borderRadius: '20px', marginBottom: '10px' }} />
+      <div style={styles.cardTop}>
+        <div className="skeleton-box" style={{ width: '38px', height: '38px', borderRadius: '50%' }} />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <div className="skeleton-box" style={{ width: '60%', height: '14px' }} />
+          <div className="skeleton-box" style={{ width: '40%', height: '10px' }} />
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: '5px', marginBottom: '10px' }}>
+        <div className="skeleton-box" style={{ width: '50px', height: '16px', borderRadius: '20px' }} />
+        <div className="skeleton-box" style={{ width: '70px', height: '16px', borderRadius: '20px' }} />
+      </div>
+      <div style={{ ...styles.cardFooter, borderTopColor: 'var(--bg)' }}>
+        <div className="skeleton-box" style={{ width: '30%', height: '14px' }} />
+        <div className="skeleton-box" style={{ width: '20%', height: '14px' }} />
+      </div>
+    </div>
+  )
+}
 
 function MatchCard({ match, onClick }) {
   const compat = match.compatibility
@@ -370,7 +413,7 @@ function MatchCard({ match, onClick }) {
         <div>
           <div style={styles.cardName}>{match.name}, {match.age}</div>
           <div style={styles.cardCity}>
-            {match.city} · {match.role === 'looking' ? 'шукає кімнату' : 'здає кімнату'}
+            {match.city} · {match.role === 'looking' ? 'шукає' : 'здає'}
           </div>
         </div>
       </div>
@@ -379,9 +422,9 @@ function MatchCard({ match, onClick }) {
       </div>
       <div style={styles.cardFooter}>
         <span style={styles.budget}>
-          до <strong>{match.budget_max ? `${match.budget_max} грн` : '—'}</strong>
+          до <strong>{match.budget_max ? `${match.budget_max} ₴` : '—'}</strong>
         </span>
-        <span style={styles.viewHint}>Переглянути →</span>
+        <span style={styles.viewHint}>Відкрити →</span>
       </div>
     </div>
   )
@@ -420,7 +463,7 @@ function GroupCard({ group, onClick }) {
 
   return (
     <div
-      style={{ ...styles.card, borderLeft: '3px solid #7C5CBF', cursor: 'pointer' }}
+      style={{ ...styles.card, borderLeft: '3px solid #7C5CBF' }}
       onClick={onClick}
     >
       <div style={{ ...styles.compatBadge, background: '#EDE8F8', color: '#534AB7' }}>
@@ -445,9 +488,9 @@ function GroupCard({ group, onClick }) {
 
       <div style={styles.cardFooter}>
         <span style={styles.budget}>
-          до <strong>{group.budget_max ? `${group.budget_max} грн` : '—'}</strong>
+          до <strong>{group.budget_max ? `${group.budget_max} ₴` : '—'}</strong>
         </span>
-        <span style={styles.viewHint}>Переглянути →</span>
+        <span style={styles.viewHint}>Відкрити →</span>
       </div>
     </div>
   )
@@ -460,12 +503,6 @@ const styles = {
     minHeight: '100vh',
     background: 'var(--bg)',
   },
-  layout: {
-    display: 'grid',
-    gridTemplateColumns: '220px 1fr',
-    maxWidth: '1100px',
-    margin: '0 auto',
-  },
   sidebar: {
     borderRight: '1px solid var(--border)',
     padding: '1.5rem 1.25rem',
@@ -477,10 +514,15 @@ const styles = {
     height: 'calc(100vh - 57px)',
     overflowY: 'auto',
   },
+  sidebarHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '4px',
+  },
   sidebarTitle: {
     fontFamily: 'DM Serif Display, serif',
     fontSize: '18px',
-    marginBottom: '4px',
   },
   filterBlock: {
     display: 'flex',
@@ -496,22 +538,24 @@ const styles = {
   },
   select: {
     width: '100%',
-    padding: '7px 10px',
+    padding: '10px 12px',
+    minHeight: '44px',
     borderRadius: '8px',
     border: '1px solid var(--border)',
-    background: 'var(--bg)',
+    background: 'var(--surface)',
     color: 'var(--text)',
-    fontSize: '13px',
+    fontSize: '14px',
     fontFamily: 'Manrope, sans-serif',
   },
   input: {
     width: '100%',
-    padding: '7px 10px',
+    padding: '10px 12px',
+    minHeight: '44px',
     borderRadius: '8px',
     border: '1px solid var(--border)',
-    background: 'var(--bg)',
+    background: 'var(--surface)',
     color: 'var(--text)',
-    fontSize: '13px',
+    fontSize: '14px',
     fontFamily: 'Manrope, sans-serif',
   },
   toggleGroup: {
@@ -520,12 +564,13 @@ const styles = {
     gap: '4px',
   },
   toggleBtn: (active) => ({
-    padding: '6px 10px',
+    padding: '10px 12px',
+    minHeight: '40px',
     borderRadius: '7px',
     border: `1px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
     background: active ? 'var(--accent-secondary)' : 'transparent',
     color: active ? 'var(--accent)' : 'var(--text-secondary)',
-    fontSize: '12px',
+    fontSize: '13px',
     fontWeight: '500',
     cursor: 'pointer',
     textAlign: 'left',
@@ -535,22 +580,25 @@ const styles = {
   checkRow: {
     display: 'flex',
     alignItems: 'center',
-    gap: '7px',
-    fontSize: '12px',
+    gap: '10px',
+    fontSize: '13px',
     color: 'var(--text-secondary)',
     cursor: 'pointer',
+    minHeight: '34px',
   },
   checkbox: {
     accentColor: 'var(--accent)',
-    width: '14px',
-    height: '14px',
+    width: '18px',
+    height: '18px',
+    cursor: 'pointer',
   },
   resetBtn: {
     width: '100%',
-    fontSize: '12px',
-    padding: '7px',
+    fontSize: '13px',
+    padding: '10px',
     marginTop: '4px',
     color: 'var(--text-secondary)',
+    minHeight: '44px',
   },
 
   main: {
@@ -564,10 +612,14 @@ const styles = {
     paddingBottom: '10px',
   },
   tab: (active) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
     background: active ? 'var(--accent)' : 'transparent',
     color: active ? '#fff' : 'var(--text-secondary)',
     border: `1px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
-    padding: '8px 20px',
+    padding: '8px 16px',
+    minHeight: '40px',
     borderRadius: '20px',
     fontSize: '14px',
     fontWeight: '600',
@@ -579,6 +631,8 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: '1.25rem',
+    flexWrap: 'wrap',
+    gap: '10px',
   },
   mainTitle: {
     fontFamily: 'DM Serif Display, serif',
@@ -589,10 +643,11 @@ const styles = {
     color: 'var(--accent)',
   },
   sortSelect: {
-    padding: '6px 10px',
+    padding: '8px 12px',
+    minHeight: '40px',
     borderRadius: '8px',
     border: '1px solid var(--border)',
-    background: 'var(--bg)',
+    background: 'var(--surface)',
     color: 'var(--text)',
     fontSize: '13px',
     fontFamily: 'Manrope, sans-serif',
@@ -615,19 +670,18 @@ const styles = {
     padding: '4rem 0',
     color: 'var(--text-secondary)',
   },
-  emptyIcon: { fontSize: '40px' },
   emptyText: { fontSize: '15px' },
 
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-    gap: '12px',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+    gap: '14px',
   },
   card: {
     background: 'var(--surface)',
     border: '1px solid var(--border)',
     borderRadius: '12px',
-    padding: '1rem',
+    padding: '1.25rem',
     cursor: 'pointer',
     transition: 'border-color 0.15s, transform 0.15s',
     position: 'relative',
@@ -636,19 +690,19 @@ const styles = {
     display: 'inline-block',
     fontSize: '11px',
     fontWeight: '600',
-    padding: '3px 9px',
+    padding: '4px 10px',
     borderRadius: '20px',
-    marginBottom: '10px',
+    marginBottom: '12px',
   },
   cardTop: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
-    marginBottom: '10px',
+    gap: '12px',
+    marginBottom: '12px',
   },
   cardAvatar: {
-    width: '38px',
-    height: '38px',
+    width: '42px',
+    height: '42px',
     borderRadius: '50%',
     background: 'var(--accent-secondary)',
     color: 'var(--accent)',
@@ -656,44 +710,45 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     fontFamily: 'DM Serif Display, serif',
-    fontSize: '16px',
+    fontSize: '18px',
     flexShrink: 0,
   },
   cardName: {
-    fontSize: '14px',
+    fontSize: '15px',
     fontWeight: '600',
   },
   cardCity: {
-    fontSize: '11px',
+    fontSize: '12px',
     color: 'var(--text-secondary)',
   },
   pills: {
     display: 'flex',
     flexWrap: 'wrap',
-    gap: '5px',
-    marginBottom: '10px',
+    gap: '6px',
+    marginBottom: '14px',
   },
   pill: {
     background: 'var(--accent-secondary)',
     color: 'var(--accent)',
-    fontSize: '10px',
-    padding: '3px 8px',
+    fontSize: '11px',
+    padding: '4px 10px',
     borderRadius: '20px',
+    fontWeight: '500',
   },
   cardFooter: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderTop: '1px solid var(--border)',
-    paddingTop: '8px',
+    paddingTop: '12px',
   },
   budget: {
-    fontSize: '12px',
+    fontSize: '13px',
     color: 'var(--text-secondary)',
   },
   viewHint: {
-    fontSize: '12px',
+    fontSize: '13px',
     color: 'var(--accent)',
-    fontWeight: '500',
+    fontWeight: '600',
   },
 }

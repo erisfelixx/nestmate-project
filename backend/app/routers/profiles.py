@@ -8,6 +8,7 @@ from app.services.profile_service import (
     delete_profile, get_active_profiles
 )
 from app.services.auth_service import get_current_user
+from app.services.contact_service import are_users_connected
 from app.models.user import User
 from typing import List
 
@@ -69,6 +70,8 @@ def get_profile(
     profile = get_profile_by_id(db, profile_id)
     if not profile:
         raise HTTPException(status_code=404, detail="Профіль не знайдено")
+    if not are_users_connected(db, current_user.id, profile.user_id):
+        profile.contact_info = None
     return profile
 
 # Список всіх активних анкет
@@ -79,7 +82,12 @@ def list_active_profiles(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    return get_active_profiles(db, skip, limit)
+    profiles = get_active_profiles(db, skip, limit)
+    for p in profiles:
+        if not are_users_connected(db, current_user.id, p.user_id):
+            p.contact_info = None
+            
+    return profiles
 
 #Oтримати профіль по user_id
 @router.get("/user/{user_id}", response_model=ProfileOut)
@@ -91,4 +99,7 @@ def get_profile_by_user(
     profile = get_profile_by_user_id(db, user_id)
     if not profile:
         raise HTTPException(status_code=404, detail="Профіль не знайдено")
+        if not are_users_connected(db, current_user.id, profile.user_id):
+            profile.contact_info = None
+            
     return profile

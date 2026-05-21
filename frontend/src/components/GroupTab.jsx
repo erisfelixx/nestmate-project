@@ -204,50 +204,58 @@ export default function GroupTab() {
             </div>
 
             {/* Кнопки керування */}
+            {/* Кнопки керування */}
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-              <button
-                className="btn"
-                style={{ fontSize: '12px' }}
-                onClick={() => {
-                  api.put(`/groups/me`, { ...group, is_active_search: !group.is_active_search })
-                    .then(fetchGroup)
-                    .catch(() => { })
-                }}
-              >
-                {group.is_active_search ? 'Деактивувати' : 'Активувати'}
-              </button>
-
-              {!confirmDelete ? (
-                <button
-                  className="btn"
-                  style={{ fontSize: '12px', color: '#C0392B', borderColor: '#C0392B' }}
-                  onClick={() => setConfirmDelete(true)}
-                >
-                  Видалити групу
-                </button>
-              ) : (
-                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                    Впевнені?
-                  </span>
-                  <button
-                    className="btn"
-                    style={{ fontSize: '12px', background: '#C0392B', color: '#fff', borderColor: '#C0392B' }}
-                    onClick={handleDelete}
-                  >
-                    Так, видалити
-                  </button>
+              
+              {group.am_i_creator ? (
+                <>
                   <button
                     className="btn"
                     style={{ fontSize: '12px' }}
-                    onClick={() => setConfirmDelete(false)}
+                    onClick={() => {
+                      api.put(`/groups/me`, { ...group, is_active_search: !group.is_active_search })
+                        .then(fetchGroup)
+                        .catch(() => {})
+                    }}
                   >
-                    Скасувати
+                    {group.is_active_search ? 'Приховати з пошуку' : 'Повернути в пошук'}
                   </button>
-                </div>
+
+                  {!confirmDelete ? (
+                    <button
+                      className="btn"
+                      style={{ fontSize: '12px', color: '#C0392B', borderColor: '#C0392B' }}
+                      onClick={() => setConfirmDelete(true)}
+                    >
+                      Видалити групу
+                    </button>
+                  ) : (
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Впевнені?</span>
+                      <button className="btn" style={{ fontSize: '12px', background: '#C0392B', color: '#fff', borderColor: '#C0392B' }} onClick={handleDelete}>Так</button>
+                      <button className="btn" style={{ fontSize: '12px' }} onClick={() => setConfirmDelete(false)}>Ні</button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <button
+                  className="btn"
+                  style={{ fontSize: '12px', color: '#C0392B', borderColor: '#C0392B' }}
+                  onClick={async () => {
+                    if (window.confirm("Ви дійсно хочете покинути цю групу?")) {
+                      try {
+                        await api.post('/groups/me/leave');
+                        setGroup(null); // Скидаємо стейт, щоб показати екран "Створити групу"
+                      } catch (e) {
+                        setError('Не вдалося покинути групу');
+                      }
+                    }
+                  }}
+                >
+                  🚪 Покинути групу
+                </button>
               )}
             </div>
-
           </div>
         </div>
 

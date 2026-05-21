@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import { Eye, EyeOff, X } from 'lucide-react'
 
 export default function AuthModal({ mode, onClose, onSwitchMode }) {
   const { login, register } = useAuth()
@@ -8,8 +9,12 @@ export default function AuthModal({ mode, onClose, onSwitchMode }) {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Стани для стилізації фокусу
+  const [focusedField, setFocusedField] = useState(null)
 
   const isLogin = mode === 'login'
 
@@ -44,13 +49,14 @@ export default function AuthModal({ mode, onClose, onSwitchMode }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-
         {/* Заголовок */}
         <div style={styles.header}>
           <h2 style={styles.title}>
             {isLogin ? 'Вхід' : 'Реєстрація'}
           </h2>
-          <button style={styles.closeBtn} onClick={onClose}>✕</button>
+          <button style={styles.closeBtn} onClick={onClose}>
+            <X size={20} />
+          </button>
         </div>
 
         <p style={styles.subtitle}>
@@ -64,25 +70,45 @@ export default function AuthModal({ mode, onClose, onSwitchMode }) {
           <div style={styles.fieldGroup}>
             <label style={styles.label}>Email</label>
             <input
-              style={styles.input}
+              style={{
+                ...styles.input,
+                borderColor: focusedField === 'email' ? 'var(--accent)' : 'var(--border)'
+              }}
               type="email"
               placeholder="your@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={handleKey}
+              onFocus={() => setFocusedField('email')}
+              onBlur={() => setFocusedField(null)}
             />
           </div>
 
           <div style={styles.fieldGroup}>
             <label style={styles.label}>Пароль</label>
-            <input
-              style={styles.input}
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={handleKey}
-            />
+            <div style={styles.passwordWrapper}>
+              <input
+                style={{
+                  ...styles.input,
+                  paddingRight: '40px', // Місце для іконки
+                  borderColor: focusedField === 'password' ? 'var(--accent)' : 'var(--border)'
+                }}
+                type={showPassword ? 'text' : 'password'}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={handleKey}
+                onFocus={() => setFocusedField('password')}
+                onBlur={() => setFocusedField(null)}
+              />
+              <button
+                style={styles.eyeBtn}
+                onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? 'Приховати пароль' : 'Показати пароль'}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -131,9 +157,11 @@ const styles = {
     border: 'none',
     background: 'transparent',
     color: 'var(--text-secondary)',
-    fontSize: '18px',
-    padding: '4px 8px',
-    borderRadius: '6px',
+    cursor: 'pointer',
+    padding: '4px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   subtitle: {
     color: 'var(--text-secondary)',
@@ -156,16 +184,34 @@ const styles = {
     fontWeight: '500',
     color: 'var(--text-secondary)',
   },
+  passwordWrapper: {
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+  },
   input: {
-    padding: '10px 14px',
+    padding: '12px 14px', 
+    minHeight: '44px',
     borderRadius: '8px',
     border: '1px solid var(--border)',
     background: 'var(--bg)',
     color: 'var(--text)',
-    fontSize: '14px',
+    fontSize: '16px', 
     fontFamily: 'Manrope, sans-serif',
     outline: 'none',
-    transition: 'border-color 0.15s',
+    transition: 'border-color 0.2s ease',
+  },
+  eyeBtn: {
+    position: 'absolute',
+    right: '12px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    background: 'transparent',
+    border: 'none',
+    color: 'var(--text-secondary)',
+    cursor: 'pointer',
+    padding: '4px',
+    display: 'flex',
   },
   error: {
     background: '#FEE8E8',
@@ -177,8 +223,9 @@ const styles = {
   },
   submitBtn: {
     width: '100%',
-    padding: '11px',
-    fontSize: '14px',
+    padding: '12px',
+    minHeight: '48px', 
+    fontSize: '16px',
     marginBottom: '16px',
   },
   switchText: {

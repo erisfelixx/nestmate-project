@@ -74,7 +74,7 @@ export default function ProfileModal({ profile, onClose, zIndex = 100 }) {
               <InfoItem label="Роль" value={profile.role === 'looking' ? '🔍 Шукає кімнату' : '🏠 Здає кімнату'} />
               <InfoItem label="Бюджет" value={profile.budget_min && profile.budget_max ? `${profile.budget_min} – ${profile.budget_max} грн` : '—'} />
               <InfoItem label="Дата заселення" value={profile.move_in_date || '—'} />
-              
+
               {profile.role === 'hosting' && (
                 <>
                   <InfoItem
@@ -137,8 +137,13 @@ export default function ProfileModal({ profile, onClose, zIndex = 100 }) {
           {/* Помилка */}
           {error && <div style={styles.errorMsg}>{error}</div>}
 
-          {/* Кнопка запиту */}
-          {requested ? (
+          {/* Кнопка запиту або контакти */}
+          {profile.contact_info ? (
+            <div style={styles.contactBox}>
+              <div style={styles.blockLabel}>Контактні дані</div>
+              <div style={styles.contactText}>{profile.contact_info}</div>
+            </div>
+          ) : requested ? (
             <div style={styles.successMsg}>✅ Запит надіслано! Очікуй підтвердження.</div>
           ) : (
             <button
@@ -331,5 +336,19 @@ const styles = {
     borderRadius: '10px',
     fontSize: '13px',
     textAlign: 'center',
+  },
+  contactBox: {
+    background: '#EDE8F8',
+    border: '1px solid #7C5CBF',
+    padding: '12px',
+    borderRadius: '10px',
+    textAlign: 'center',
+    marginTop: '4px'
+  },
+  contactText: {
+    fontSize: '15px',
+    fontWeight: '600',
+    color: '#534AB7',
+    marginTop: '4px'
   },
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import GroupTab from '../components/GroupTab'
 import api from '../api/axios'
+import { User, Home, Coffee, ChevronRight, ChevronLeft, Save, Inbox, Users } from 'lucide-react'
 
 
 const CITIES = [
@@ -37,6 +38,8 @@ export default function Profile() {
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [step, setStep] = useState(1)
+  const totalSteps = 3
 
   useEffect(() => {
     api.get('/profiles/me')
@@ -118,300 +121,313 @@ export default function Profile() {
 
         {tab === 'profile' && (
           <>
-            {/* БЛОК 1 — Про себе */}
-            <Section title="Про себе">
-              <div style={styles.grid2}>
-                <Field label="Ім'я">
-                  <input
-                    style={styles.input}
-                    placeholder="Як тебе звати?"
-                    value={form.name}
-                    onChange={e => set('name', e.target.value)}
-                  />
-                </Field>
-                <Field label="Фото (URL посилання)">
-                  <input
-                    style={styles.input}
-                    placeholder="https://i.imgur.com/yourphoto.jpg"
-                    value={form.photo_url || ''}
-                    onChange={e => set('photo_url', e.target.value)}
-                  />
-                  {form.photo_url && (
-                    <img
-                      src={form.photo_url}
-                      alt="Фото профілю"
-                      style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', marginTop: '8px' }}
-                      onError={e => e.target.style.display = 'none'}
-                    />
-                  )}
-                </Field>
-
-                <Field label="Вік">
-                  <input
-                    style={styles.input}
-                    type="number"
-                    placeholder="23"
-                    value={form.age}
-                    onChange={e => set('age', e.target.value)}
-                  />
-                </Field>
+            {/* ПРОГРЕС-БАР */}
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: '500' }}>
+                <span>Крок {step} з {totalSteps}</span>
+                <span>{step === 1 ? 'Базові дані' : step === 2 ? 'Житло' : 'Звички'}</span>
               </div>
-
-              <div style={styles.grid2}>
-                <Field label="Стать">
-                  <select
-                    style={styles.input}
-                    value={form.gender}
-                    onChange={e => set('gender', e.target.value)}
-                  >
-                    <option value="">Оберіть...</option>
-                    <option value="female">Жінка</option>
-                    <option value="male">Чоловік</option>
-                    <option value="other">Інше</option>
-                  </select>
-                </Field>
-
-                <Field label="Місто">
-                  <select
-                    style={styles.input}
-                    value={form.city}
-                    onChange={e => set('city', e.target.value)}
-                  >
-                    <option value="">Оберіть місто...</option>
-                    {CITIES.map(c => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                </Field>
+              <div className="progress-bg">
+                <div className="progress-fill" style={{ width: `${(step / totalSteps) * 100}%` }}></div>
               </div>
+            </div>
 
-              <Field label="Про себе">
-                <textarea
-                  style={styles.textarea}
-                  placeholder="Розкажи коротко про себе..."
-                  value={form.bio}
-                  onChange={e => set('bio', e.target.value)}
-                  rows={3}
-                />
-              </Field>
+            <div style={styles.formCard}>
+              
+              {/* КРОК 1: Базові дані */}
+              {step === 1 && (
+                <div className="step-container">
+                  <h3 style={styles.stepTitle}><User size={18} /> Базові дані</h3>
+                  
+                  <div style={styles.grid2}>
+                    <Field label="Ім'я">
+                      <input
+                        style={styles.input}
+                        placeholder="Як тебе звати?"
+                        value={form.name}
+                        onChange={e => set('name', e.target.value)}
+                      />
+                    </Field>
+                    <Field label="Фото (URL посилання)">
+                      <input
+                        style={styles.input}
+                        placeholder="https://i.imgur.com/yourphoto.jpg"
+                        value={form.photo_url || ''}
+                        onChange={e => set('photo_url', e.target.value)}
+                      />
+                      {form.photo_url && (
+                        <img
+                          src={form.photo_url}
+                          alt="Фото профілю"
+                          style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', marginTop: '8px' }}
+                          onError={e => e.target.style.display = 'none'}
+                        />
+                      )}
+                    </Field>
+                  </div>
 
-              <Field label="Інтереси та хобі" hint="Не впливає на сумісність">
-                <textarea
-                  style={styles.textarea}
-                  placeholder="Граю на гітарі, люблю каву, дивлюся серіали..."
-                  value={form.interests}
-                  onChange={e => set('interests', e.target.value)}
-                  rows={2}
-                />
-              </Field>
+                  <div style={styles.grid2}>
+                    <Field label="Вік">
+                      <input
+                        style={styles.input}
+                        type="number"
+                        placeholder="23"
+                        value={form.age}
+                        onChange={e => set('age', e.target.value)}
+                      />
+                    </Field>
+                    <Field label="Стать">
+                      <select
+                        style={styles.input}
+                        value={form.gender}
+                        onChange={e => set('gender', e.target.value)}
+                      >
+                        <option value="">Оберіть...</option>
+                        <option value="female">Жінка</option>
+                        <option value="male">Чоловік</option>
+                        <option value="other">Інше</option>
+                      </select>
+                    </Field>
+                  </div>
 
-              <Field label="Контакти для зв'язку" hint="Буде розблоковано після взаємного підтвердження">
-                <input
-                  style={styles.input}
-                  placeholder="Telegram: @username / тел: +380..."
-                  value={form.contact_info}
-                  onChange={e => set('contact_info', e.target.value)}
-                />
-              </Field>
-            </Section>
-
-            {/* БЛОК 2 — Житло */}
-            <Section title="Житло">
-              <Field label="Роль">
-                <div style={styles.radioGroup}>
-                  {[
-                    { val: 'looking', label: '🔍 Шукаю кімнату' },
-                    { val: 'hosting', label: '🏠 Здаю кімнату' },
-                  ].map(opt => (
-                    <button
-                      key={opt.val}
-                      style={styles.radioBtn(form.role === opt.val)}
-                      onClick={() => set('role', opt.val)}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </Field>
-
-              {form.role === 'hosting' && (
-                <>
-                  <Field label="Поверх">
-                    <input
+                  <Field label="Місто">
+                    <select
                       style={styles.input}
-                      type="number"
-                      placeholder="3"
-                      value={form.floor || ''}
-                      onChange={e => set('floor', e.target.value ? parseInt(e.target.value) : null)}
+                      value={form.city}
+                      onChange={e => set('city', e.target.value)}
+                    >
+                      <option value="">Оберіть місто...</option>
+                      {CITIES.map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </Field>
+
+                  <Field label="Про себе">
+                    <textarea
+                      style={styles.textarea}
+                      placeholder="Розкажи коротко про себе..."
+                      value={form.bio}
+                      onChange={e => set('bio', e.target.value)}
+                      rows={3}
                     />
                   </Field>
 
-                  <Field label="Інфраструктура будинку">
-                    <div style={styles.checkGrid}>
-                      <CheckCard
-                        label="Газова плита / колонка"
-                        emoji="🔥"
-                        checked={form.has_gas_appliances}
-                        onChange={v => set('has_gas_appliances', v)}
-                      />
-                      <CheckCard
-                        label="Є укриття у ЖК"
-                        emoji="🛡️"
-                        checked={form.has_shelter}
-                        onChange={v => set('has_shelter', v)}
-                      />
+                  <Field label="Інтереси та хобі" hint="Не впливає на сумісність">
+                    <textarea
+                      style={styles.textarea}
+                      placeholder="Граю на гітарі, люблю каву, дивлюся серіали..."
+                      value={form.interests}
+                      onChange={e => set('interests', e.target.value)}
+                      rows={2}
+                    />
+                  </Field>
+
+                  <Field label="Контакти для зв'язку" hint="Буде розблоковано після взаємного підтвердження">
+                    <input
+                      style={styles.input}
+                      placeholder="Telegram: @username / тел: +380..."
+                      value={form.contact_info}
+                      onChange={e => set('contact_info', e.target.value)}
+                    />
+                  </Field>
+                </div>
+              )}
+
+              {/* КРОК 2: Житло */}
+              {step === 2 && (
+                <div className="step-container">
+                  <h3 style={styles.stepTitle}><Home size={18} /> Житло та умови</h3>
+                  
+                  <Field label="Роль">
+                    <div style={styles.radioGroup}>
+                      {[
+                        { val: 'looking', label: '🔍 Шукаю кімнату' },
+                        { val: 'hosting', label: '🏠 Здаю кімнату' },
+                      ].map(opt => (
+                        <button
+                          key={opt.val}
+                          style={styles.radioBtn(form.role === opt.val)}
+                          onClick={() => set('role', opt.val)}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
                     </div>
                   </Field>
 
-                  {form.has_shelter && (
-                    <Field label="Тип укриття">
-                      <div style={styles.radioGroup}>
-                        {[
-                          { val: 'basement', label: '🏚️ Підвал' },
-                          { val: 'parking', label: '🚗 Паркінг' },
-                          { val: 'both', label: '✅ Обидва' },
-                        ].map(opt => (
-                          <button
-                            key={opt.val}
-                            style={styles.radioBtn(form.shelter_type === opt.val)}
-                            onClick={() => set('shelter_type', opt.val)}
-                          >
-                            {opt.label}
-                          </button>
-                        ))}
-                      </div>
-                    </Field>
+                  {form.role === 'hosting' && (
+                    <>
+                      <Field label="Поверх">
+                        <input
+                          style={styles.input}
+                          type="number"
+                          placeholder="3"
+                          value={form.floor || ''}
+                          onChange={e => set('floor', e.target.value ? parseInt(e.target.value) : null)}
+                        />
+                      </Field>
+
+                      <Field label="Інфраструктура будинку">
+                        <div style={styles.checkGrid}>
+                          <CheckCard
+                            label="Газова плита"
+                            emoji="🔥"
+                            checked={form.has_gas_appliances}
+                            onChange={v => set('has_gas_appliances', v)}
+                          />
+                          <CheckCard
+                            label="Є укриття"
+                            emoji="🛡️"
+                            checked={form.has_shelter}
+                            onChange={v => set('has_shelter', v)}
+                          />
+                        </div>
+                      </Field>
+
+                      {form.has_shelter && (
+                        <Field label="Тип укриття">
+                          <div style={styles.radioGroup}>
+                            {[
+                              { val: 'basement', label: '🏚️ Підвал' },
+                              { val: 'parking', label: '🚗 Паркінг' },
+                              { val: 'both', label: '✅ Обидва' },
+                            ].map(opt => (
+                              <button
+                                key={opt.val}
+                                style={styles.radioBtn(form.shelter_type === opt.val)}
+                                onClick={() => set('shelter_type', opt.val)}
+                              >
+                                {opt.label}
+                              </button>
+                            ))}
+                          </div>
+                        </Field>
+                      )}
+                    </>
                   )}
-                </>
+
+                  <div style={styles.grid2}>
+                    <Field label="Бюджет від (грн/міс)">
+                      <input
+                        style={styles.input}
+                        type="number"
+                        placeholder="4000"
+                        value={form.budget_min}
+                        onChange={e => set('budget_min', e.target.value)}
+                      />
+                    </Field>
+                    <Field label="Бюджет до (грн/міс)">
+                      <input
+                        style={styles.input}
+                        type="number"
+                        placeholder="10000"
+                        value={form.budget_max}
+                        onChange={e => set('budget_max', e.target.value)}
+                      />
+                    </Field>
+                  </div>
+
+                  <Field label="Бажана дата заселення">
+                    <input
+                      style={styles.input}
+                      type="date"
+                      value={form.move_in_date || ''}
+                      onChange={e => set('move_in_date', e.target.value)}
+                    />
+                  </Field>
+                </div>
               )}
 
-              <div style={styles.grid2}>
-                <Field label="Бюджет від (грн/міс)">
-                  <input
-                    style={styles.input}
-                    type="number"
-                    placeholder="4000"
-                    value={form.budget_min}
-                    onChange={e => set('budget_min', e.target.value)}
+              {/* КРОК 3: Звички */}
+              {step === 3 && (
+                <div className="step-container">
+                  <h3 style={styles.stepTitle}><Coffee size={18} /> Звички та ритм життя</h3>
+                  
+                  <Field label="Режим дня">
+                    <div style={styles.radioGroup}>
+                      {[
+                        { val: 'early_bird', label: '🌅 Жайворонок' },
+                        { val: 'night_owl', label: '🦉 Сова' },
+                      ].map(opt => (
+                        <button
+                          key={opt.val}
+                          style={styles.radioBtn(form.schedule === opt.val)}
+                          onClick={() => set('schedule', opt.val)}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </Field>
+
+                  <ScaleField
+                    label="Рівень чистоти"
+                    hint="1 — не звертаю уваги, 7 — дуже важлива чистота"
+                    value={form.cleanliness}
+                    onChange={v => set('cleanliness', v)}
                   />
-                </Field>
-                <Field label="Бюджет до (грн/міс)">
-                  <input
-                    style={styles.input}
-                    type="number"
-                    placeholder="10000"
-                    value={form.budget_max}
-                    onChange={e => set('budget_max', e.target.value)}
+
+                  <ScaleField
+                    label="Рівень шуму"
+                    hint="1 — повна тиша, 7 — музика та шум — норма"
+                    value={form.noise_level}
+                    onChange={v => set('noise_level', v)}
                   />
-                </Field>
-              </div>
 
-              <Field label="Бажана дата заселення">
-                <input
-                  style={styles.input}
-                  type="date"
-                  value={form.move_in_date || ''}
-                  onChange={e => set('move_in_date', e.target.value)}
-                />
-              </Field>
-            </Section>
+                  <ScaleField
+                    label="Частота гостей"
+                    hint="1 — ніколи, 7 — гості майже щодня"
+                    value={form.guests_frequency}
+                    onChange={v => set('guests_frequency', v)}
+                  />
 
-            {/* БЛОК 3 — Звички */}
-            <Section title="Звички та вподобання">
-
-              <Field label="Режим дня">
-                <div style={styles.radioGroup}>
-                  {[
-                    { val: 'early_bird', label: '🌅 Жайворонок' },
-                    { val: 'night_owl', label: '🦉 Сова' },
-                  ].map(opt => (
-                    <button
-                      key={opt.val}
-                      style={styles.radioBtn(form.schedule === opt.val)}
-                      onClick={() => set('schedule', opt.val)}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
+                  <div style={styles.checkGrid}>
+                    <CheckCard label="Маю тварин" emoji="🐾" checked={form.has_pets} onChange={v => set('has_pets', v)} />
+                    <CheckCard label="Ок з тваринами" emoji="💚" checked={form.ok_with_pets} onChange={v => set('ok_with_pets', v)} />
+                    <CheckCard label="Курю" emoji="🚬" checked={form.smoking} onChange={v => set('smoking', v)} />
+                    <CheckCard label="Ок з курінням" emoji="🪟" checked={form.ok_with_smoking} onChange={v => set('ok_with_smoking', v)} />
+                    <CheckCard label="Є діти" emoji="👶" checked={form.has_children} onChange={v => set('has_children', v)} />
+                    <CheckCard label="Ок з дітьми" emoji="🧸" checked={form.ok_with_children} onChange={v => set('ok_with_children', v)} />
+                  </div>
                 </div>
-              </Field>
+              )}
 
-              <ScaleField
-                label="Рівень чистоти"
-                hint="1 — не звертаю уваги, 7 — дуже важлива чистота"
-                value={form.cleanliness}
-                onChange={v => set('cleanliness', v)}
-              />
+              {/* Повідомлення */}
+              {error && <div style={styles.errorMsg} style={{ marginTop: '14px' }}>{error}</div>}
+              {success && <div style={styles.successMsg} style={{ marginTop: '14px' }}>✅ Профіль збережено!</div>}
 
-              <ScaleField
-                label="Рівень шуму"
-                hint="1 — повна тиша, 7 — музика та шум — норма"
-                value={form.noise_level}
-                onChange={v => set('noise_level', v)}
-              />
+              {/* КНОПКИ НАВІГАЦІЇ СТЕПЕРА */}
+              <div style={styles.stepperButtons}>
+                <button 
+                  className="btn" 
+                  onClick={() => setStep(step - 1)} 
+                  disabled={step === 1}
+                  style={{ visibility: step === 1 ? 'hidden' : 'visible', display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <ChevronLeft size={16} /> Назад
+                </button>
 
-              <ScaleField
-                label="Частота гостей"
-                hint="1 — ніколи, 7 — гості майже щодня"
-                value={form.guests_frequency}
-                onChange={v => set('guests_frequency', v)}
-              />
-
-              {/* Тварини */}
-              <div style={styles.checkGrid}>
-                <CheckCard
-                  label="Маю тварин"
-                  emoji="🐾"
-                  checked={form.has_pets}
-                  onChange={v => set('has_pets', v)}
-                />
-                <CheckCard
-                  label="Готовий жити з тваринами"
-                  emoji="💚"
-                  checked={form.ok_with_pets}
-                  onChange={v => set('ok_with_pets', v)}
-                />
-                <CheckCard
-                  label="Курю"
-                  emoji="🚬"
-                  checked={form.smoking}
-                  onChange={v => set('smoking', v)}
-                />
-                <CheckCard
-                  label="Можна курити у приміщенні"
-                  emoji="🪟"
-                  checked={form.ok_with_smoking}
-                  onChange={v => set('ok_with_smoking', v)}
-                />
-
-                <CheckCard
-                  label="Є діти"
-                  emoji="👶"
-                  checked={form.has_children}
-                  onChange={v => set('has_children', v)}
-                />
-                <CheckCard
-                  label="Можна з дітьми"
-                  emoji="🧸"
-                  checked={form.ok_with_children}
-                  onChange={v => set('ok_with_children', v)}
-                />
+                {step < totalSteps ? (
+                  <button 
+                    className="btn btn-primary" 
+                    onClick={() => setStep(step + 1)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    Далі <ChevronRight size={16} />
+                  </button>
+                ) : (
+                  <button 
+                    className="btn btn-primary" 
+                    onClick={handleSave}
+                    disabled={saving}
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#3B6D11', borderColor: '#3B6D11' }}
+                  >
+                    <Save size={16} /> {saving ? 'Збереження...' : (isNew ? 'Створити профіль' : 'Зберегти зміни')}
+                  </button>
+                )}
               </div>
-            </Section>
-
-            {/* Повідомлення */}
-            {error && <div style={styles.errorMsg}>{error}</div>}
-            {success && <div style={styles.successMsg}>✅ Профіль збережено!</div>}
-
-            {/* Кнопка збереження */}
-            <button
-              className="btn btn-primary"
-              style={styles.saveBtn}
-              onClick={handleSave}
-              disabled={saving}
-            >
-              {saving ? 'Збереження...' : isNew ? 'Створити профіль' : 'Зберегти зміни'}
-            </button>
+            </div>
           </>
         )}
         {tab === 'requests' && <RequestsTab />}
@@ -485,13 +501,8 @@ function RequestsTab() {
 
   useEffect(() => {
     api.get('/contacts/incoming')
-      .then(res => {
-        console.log('Вхідні запити (Дані з бекенду):', res.data)
-        setRequests(res.data)
-      })
-      .catch(err => {
-        console.log('Помилка завантаження запитів:', err.response?.data)
-      })
+      .then(res => setRequests(res.data))
+      .catch(err => console.log('Помилка завантаження запитів:', err.response?.data))
       .finally(() => setLoading(false))
   }, [])
 
@@ -500,49 +511,61 @@ function RequestsTab() {
     setRequests(r => r.filter(req => req.request_id !== id))
   }
 
-  if (loading) return <div style={{ color: 'var(--text-secondary)' }}>Завантаження...</div>
+  if (loading) return <div style={{ color: 'var(--text-secondary)', padding: '2rem 0', textAlign: 'center' }}>Завантаження...</div>
+  
   if (!requests.length) return (
-    <div style={emptyStyle}>
-      <div style={{ fontSize: '36px' }}>📭</div>
-      <p>Вхідних запитів немає</p>
+    <div style={emptyStyle.container}>
+      <div style={emptyStyle.iconWrapper}><Inbox size={42} strokeWidth={1.5} /></div>
+      <h3 style={emptyStyle.title}>Тут поки тихо</h3>
+      <p style={emptyStyle.subtitle}>У тебе ще немає нових запитів на сусідство.</p>
     </div>
   )
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '1rem' }}>
       {requests.map(r => (
         <div key={r.request_id} style={requestCardStyle}>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '10px' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: '14px' }}>
             <div style={{
-              width: '42px', height: '42px', borderRadius: '50%',
-              background: '#EDE8F8', color: '#534AB7',
+              width: '46px', height: '46px', borderRadius: '50%',
+              background: 'var(--accent-secondary)', color: 'var(--accent)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: 'DM Serif Display, serif', fontSize: '18px', flexShrink: 0,
+              fontFamily: 'DM Serif Display, serif', fontSize: '20px', flexShrink: 0,
             }}>
               {r.name?.[0] || '?'}
             </div>
             <div>
-              <div style={{ fontWeight: '500', fontSize: '14px' }}>
+              <div style={{ fontWeight: '600', fontSize: '15px' }}>
                 {r.name || 'Без імені'}, {r.age}
               </div>
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                {r.city} · {r.schedule === 'early_bird' ? '🌅 Жайворонок' : r.schedule === 'night_owl' ? '🦉 Сова' : ''}
+              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                {r.city} · {r.schedule === 'early_bird' ? '🌅 Жайворонок' : r.schedule === 'night_owl' ? '🦉 Сова' : 'Без режиму'}
               </div>
               {r.bio && (
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                  {r.bio.slice(0, 80)}{r.bio.length > 80 ? '...' : ''}
+                <div style={{ fontSize: '13px', color: 'var(--text)', marginTop: '8px', lineHeight: 1.5 }}>
+                  {r.bio.slice(0, 90)}{r.bio.length > 90 ? '...' : ''}
                 </div>
               )}
             </div>
           </div>
-          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '10px' }}>
-            {new Date(r.created_at).toLocaleDateString('uk-UA')}
+          
+          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '14px' }}>
+            Надіслано: {new Date(r.created_at).toLocaleDateString('uk-UA')}
           </div>
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-            <button className="btn" style={{ fontSize: '13px', padding: '6px 14px' }}
-              onClick={() => respond(r.request_id, false)}>Відхилити</button>
-            <button className="btn btn-primary" style={{ fontSize: '13px', padding: '6px 14px' }}
-              onClick={() => respond(r.request_id, true)}>Прийняти</button>
+          
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button 
+              className="btn" 
+              style={{ flex: 1, fontSize: '14px', padding: '10px', minHeight: '44px' }}
+              onClick={() => respond(r.request_id, false)}>
+              Відхилити
+            </button>
+            <button 
+              className="btn btn-primary" 
+              style={{ flex: 1, fontSize: '14px', padding: '10px', minHeight: '44px' }}
+              onClick={() => respond(r.request_id, true)}>
+              Прийняти
+            </button>
           </div>
         </div>
       ))}
@@ -560,21 +583,32 @@ function ContactsTab() {
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <div style={{ color: 'var(--text-secondary)' }}>Завантаження...</div>
+  if (loading) return <div style={{ color: 'var(--text-secondary)', padding: '2rem 0', textAlign: 'center' }}>Завантаження...</div>
+  
   if (!contacts.length) return (
-    <div style={emptyStyle}>
-      <div style={{ fontSize: '36px' }}>🤝</div>
-      <p>Прийнятих контактів ще немає</p>
+    <div style={emptyStyle.container}>
+      <div style={emptyStyle.iconWrapper}><Users size={42} strokeWidth={1.5} /></div>
+      <h3 style={emptyStyle.title}>Немає контактів</h3>
+      <p style={emptyStyle.subtitle}>Приймай вхідні запити або надсилай свої, щоб обмінюватися контактами з іншими.</p>
     </div>
   )
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '1rem' }}>
       {contacts.map(c => (
         <div key={c.request_id} style={requestCardStyle}>
           <div>
-            <div style={{ fontWeight: '500' }}>{c.name || `Користувач #${c.user_id}`}</div>
-            <div style={{ fontSize: '13px', color: 'var(--accent)', marginTop: '4px' }}>
+            <div style={{ fontWeight: '600', fontSize: '15px' }}>{c.name || `Користувач #${c.user_id}`}</div>
+            <div style={{ 
+              fontSize: '14px', 
+              color: 'var(--accent)', 
+              marginTop: '6px', 
+              background: 'var(--accent-secondary)', 
+              display: 'inline-block', 
+              padding: '6px 12px', 
+              borderRadius: '8px',
+              fontWeight: '500'
+            }}>
               📞 {c.contact_info || 'Контакт не вказано'}
             </div>
           </div>
@@ -585,19 +619,52 @@ function ContactsTab() {
 }
 
 const emptyStyle = {
-  display: 'flex', flexDirection: 'column', alignItems: 'center',
-  gap: '10px', padding: '3rem 0', color: 'var(--text-secondary)',
+  container: {
+    display: 'flex', 
+    flexDirection: 'column', 
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px', 
+    padding: '4rem 1.5rem', 
+    textAlign: 'center',
+    background: 'var(--surface)',
+    border: '1px dashed var(--border)',
+    borderRadius: '12px',
+    marginTop: '1rem'
+  },
+  iconWrapper: {
+    width: '72px',
+    height: '72px',
+    borderRadius: '50%',
+    background: 'var(--accent-secondary)',
+    color: 'var(--accent)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: '10px'
+  },
+  title: {
+    fontFamily: 'DM Serif Display, serif',
+    fontSize: '20px',
+    color: 'var(--text)',
+    margin: 0
+  },
+  subtitle: {
+    fontSize: '14px',
+    color: 'var(--text-secondary)',
+    margin: 0,
+    maxWidth: '280px',
+    lineHeight: 1.5
+  }
 }
 
 const requestCardStyle = {
   background: 'var(--surface)',
   border: '1px solid var(--border)',
-  borderRadius: '10px',
-  padding: '1rem 1.25rem',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  gap: '12px',
+  borderRadius: '12px',
+  padding: '1.25rem',
+  boxShadow: 'var(--shadow)',
+  transition: 'transform 0.2s'
 }
 
 // ── Стилі ─────────────────────────────────────────────────────────
@@ -831,4 +898,31 @@ const styles = {
     fontFamily: 'Manrope, sans-serif',
     marginBottom: '-1px',
   }),
+  
+  formCard: {
+    background: 'var(--surface)',
+    border: '1px solid var(--border)',
+    borderRadius: '12px',
+    padding: '1.5rem',
+    boxShadow: 'var(--shadow)',
+  },
+  stepTitle: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontFamily: 'DM Serif Display, serif',
+    fontSize: '20px',
+    marginBottom: '1.5rem',
+    color: 'var(--text)',
+    borderBottom: '1px solid var(--border)',
+    paddingBottom: '10px',
+  },
+  stepperButtons: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: '2rem',
+    paddingTop: '1rem',
+    borderTop: '1px solid var(--border)',
+  },
 }

@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import or_, and_
 from app.models.contact_request import ContactRequest
 from app.models.profile import Profile
 
@@ -54,3 +55,18 @@ def get_accepted_contacts(db: Session, user_id: int):
         (ContactRequest.sender_id == user_id) |
         (ContactRequest.receiver_id == user_id)
     ).all()
+
+def are_users_connected(db: Session, user1_id: int, user2_id: int) -> bool:
+    if user1_id == user2_id:
+        return True
+        
+    # шукаємо підтверджений запит між цими двома юзерами (неважливо, хто відправляв)
+    connection = db.query(ContactRequest).filter(
+        ContactRequest.status == "accepted",
+        or_(
+            and_(ContactRequest.sender_id == user1_id, ContactRequest.receiver_id == user2_id),
+            and_(ContactRequest.sender_id == user2_id, ContactRequest.receiver_id == user1_id)
+        )
+    ).first()
+    
+    return connection is not None

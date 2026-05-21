@@ -5,7 +5,8 @@ from app.services.auth_service import get_current_user
 from app.services.group_service import (
     create_group, get_my_group, invite_to_group,
     apply_to_group, respond_group_request,
-    get_group_compatibility, get_active_groups
+    get_group_compatibility, get_active_groups,
+    leave_group
 )
 from app.services.profile_service import get_profile_by_user_id
 from app.models.user import User
@@ -87,6 +88,7 @@ def get_my_group_info(
     return {
         "id": group.id,
         "name": group.name,
+        "am_i_creator": group.creator_id == current_user.id,
         "city": group.city,
         "budget_min": group.budget_min,
         "budget_max": group.budget_max,
@@ -217,3 +219,14 @@ def update_group(
         group.description = data.description
     db.commit()
     return {"message": "Оновлено"}
+
+# вийти з групи (для звичайних учасників)
+@router.post("/me/leave")
+def leave_my_group(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    success, error = leave_group(db, current_user.id)
+    if error:
+        raise HTTPException(status_code=400, detail=error)
+    return {"message": "Ви успішно вийшли з групи"}

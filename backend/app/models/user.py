@@ -12,4 +12,4 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    profile = relationship("Profile", back_populates="user", uselist=False)
+    profile = relationship("Profile", back_populates="user", uselist=False, cascade="all, delete-orphan")

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import AuthModal from '../components/AuthModal'
@@ -49,99 +49,107 @@ export default function Home() {
         </section>
 
         {/* СТАТИСТИКА */}
-        <section style={styles.stats}>
-          {[
-            { num: '1 200+', label: 'активних анкет' },
-            { num: '87%',    label: 'вдалих підборів' },
-            { num: '24',     label: 'міста України' },
-          ].map((s) => (
-            <div key={s.label} style={styles.statCard}>
-              <div style={styles.statNum}>{s.num}</div>
-              <div style={styles.statLabel}>{s.label}</div>
-            </div>
-          ))}
-        </section>
+        <RevealWrapper>
+          <section style={styles.stats}>
+            {[
+              { num: '1 200+', label: 'активних анкет' },
+              { num: '87%', label: 'вдалих підборів' },
+              { num: '24', label: 'міста України' },
+            ].map((s) => (
+              <div key={s.label} style={styles.statCard}>
+                <div style={styles.statNum}>{s.num}</div>
+                <div style={styles.statLabel}>{s.label}</div>
+              </div>
+            ))}
+          </section>
+        </RevealWrapper>
 
         {/* ЯК ЦЕ ПРАЦЮЄ */}
-        <section id="how" style={styles.section}>
-          <h2 style={styles.sectionTitle}>Як це працює</h2>
-          <div style={styles.steps}>
-            {[
-              {
-                n: '1',
-                title: 'Створи профіль',
-                desc: 'Розкажи про себе, свої звички та побажання до житла',
-              },
-              {
-                n: '2',
-                title: 'Заповни анкету',
-                desc: 'Режим дня, чистота, ставлення до тварин та гостей',
-              },
-              {
-                n: '3',
-                title: 'Переглядай матчі',
-                desc: 'Ми покажемо найсумісніших першими з відсотком збігу',
-              },
-            ].map((s) => (
-              <div key={s.n} style={styles.step}>
-                <div style={styles.stepNum}>{s.n}</div>
-                <h3 style={styles.stepTitle}>{s.title}</h3>
-                <p style={styles.stepDesc}>{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        <RevealWrapper>
+          <section id="how" style={styles.section}>
+            <h2 style={styles.sectionTitle}>Як це працює</h2>
+            <div style={styles.steps}>
+              {[
+                {
+                  n: '1',
+                  title: 'Створи профіль',
+                  desc: 'Розкажи про себе, свої звички та побажання до житла',
+                },
+                {
+                  n: '2',
+                  title: 'Заповни анкету',
+                  desc: 'Режим дня, чистота, ставлення до тварин та гостей',
+                },
+                {
+                  n: '3',
+                  title: 'Переглядай матчі',
+                  desc: 'Ми покажемо найсумісніших першими з відсотком збігу',
+                },
+              ].map((s) => (
+                <div key={s.n} style={styles.step}>
+                  <div style={styles.stepNum}>{s.n}</div>
+                  <h3 style={styles.stepTitle}>{s.title}</h3>
+                  <p style={styles.stepDesc}>{s.desc}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        </RevealWrapper>
 
         {/* ПРИКЛАДИ КАРТОК */}
-        <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>Активні анкети</h2>
-          <div style={styles.cards}>
-            {SAMPLE_CARDS.map((c) => (
-              <div key={c.name} style={styles.card}>
-                <div style={styles.compatBadge(c.compat)}>
-                  {c.compat}% сумісності
-                </div>
-                <div style={styles.cardTop}>
-                  <div style={styles.avatar(c.color)}>{c.initial}</div>
-                  <div>
-                    <div style={styles.cardName}>{c.name}</div>
-                    <div style={styles.cardCity}>{c.city}</div>
+        <RevealWrapper>
+          <section style={styles.section}>
+            <h2 style={styles.sectionTitle}>Активні анкети</h2>
+            <div style={styles.cards}>
+              {SAMPLE_CARDS.map((c) => (
+                <div key={c.name} style={styles.card}>
+                  <div style={styles.compatBadge(c.compat)}>
+                    {c.compat}% сумісності
+                  </div>
+                  <div style={styles.cardTop}>
+                    <div style={styles.avatar(c.color)}>{c.initial}</div>
+                    <div>
+                      <div style={styles.cardName}>{c.name}</div>
+                      <div style={styles.cardCity}>{c.city}</div>
+                    </div>
+                  </div>
+                  <div style={styles.pills}>
+                    {c.tags.map((t) => (
+                      <span key={t} style={styles.pill}>{t}</span>
+                    ))}
+                  </div>
+                  <div style={styles.cardFooter}>
+                    <span style={styles.budget}>до <strong>{c.budget}</strong></span>
+                    <button
+                      className="btn"
+                      style={styles.cardBtn}
+                      onClick={handleCTA}
+                    >
+                      Переглянути
+                    </button>
                   </div>
                 </div>
-                <div style={styles.pills}>
-                  {c.tags.map((t) => (
-                    <span key={t} style={styles.pill}>{t}</span>
-                  ))}
-                </div>
-                <div style={styles.cardFooter}>
-                  <span style={styles.budget}>до <strong>{c.budget}</strong></span>
-                  <button
-                    className="btn"
-                    style={styles.cardBtn}
-                    onClick={handleCTA}
-                  >
-                    Переглянути
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        </RevealWrapper>
 
         {/* CTA БАНЕР */}
-        <section style={styles.banner}>
-          <h2 style={styles.bannerTitle}>Готова знайти свого сусіда?</h2>
-          <p style={styles.bannerSub}>
-            Реєстрація займає менше хвилини
-          </p>
-          <button
-            className="btn btn-primary"
-            style={styles.ctaBtn}
-            onClick={handleCTA}
-          >
-            Почати зараз
-          </button>
-        </section>
+        <RevealWrapper>
+          <section style={styles.banner}>
+            <h2 style={styles.bannerTitle}>Готова знайти свого сусіда?</h2>
+            <p style={styles.bannerSub}>
+              Реєстрація займає менше хвилини
+            </p>
+            <button
+              className="btn btn-primary"
+              style={styles.ctaBtn}
+              onClick={handleCTA}
+            >
+              Почати зараз
+            </button>
+          </section>
+        </RevealWrapper>
 
       </main>
 
@@ -153,6 +161,35 @@ export default function Home() {
         />
       )}
     </>
+  )
+}
+
+function RevealWrapper({ children }) {
+  const [isVisible, setIsVisible] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.disconnect() // анімація програється лише один раз
+        }
+      },
+      { threshold: 0.15 } // спрацьовує, коли елемент видно на 15%
+    )
+
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div
+      ref={ref}
+      className={`reveal-section ${isVisible ? 'is-visible' : ''}`}
+    >
+      {children}
+    </div>
   )
 }
 
@@ -197,6 +234,7 @@ const styles = {
   hero: {
     textAlign: 'center',
     padding: '4rem 0 3rem',
+    animation: 'fadeIn 0.8s ease-out',
   },
   tag: {
     display: 'inline-block',
@@ -222,7 +260,7 @@ const styles = {
   },
   sub: {
     color: 'var(--text-secondary)',
-    fontSize: '15px',
+    fontSize: '16px',
     lineHeight: 1.7,
     marginBottom: '2rem',
   },
@@ -233,19 +271,20 @@ const styles = {
     flexWrap: 'wrap',
   },
   ctaBtn: {
-    padding: '11px 26px',
-    fontSize: '14px',
+    padding: '12px 28px',
+    fontSize: '16px',
     fontWeight: '600',
+    minHeight: '48px',
   },
   secondBtn: {
-    padding: '11px 22px',
-    fontSize: '14px',
+    padding: '12px 24px',
+    fontSize: '16px',
+    minHeight: '48px',
   },
-
   // СТАТИСТИКА
   stats: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
     gap: '12px',
     marginBottom: '3rem',
   },
@@ -282,7 +321,7 @@ const styles = {
   // КРОКИ
   steps: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
     gap: '12px',
   },
   step: {
@@ -318,7 +357,7 @@ const styles = {
   // КАРТКИ
   cards: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
     gap: '12px',
   },
   card: {
@@ -382,6 +421,8 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '10px',
     borderTop: '1px solid var(--border)',
     paddingTop: '8px',
   },

@@ -98,3 +98,136 @@ button {
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* Адаптація навігації */
+@media (max-width: 768px) {
+  .desktop-nav {
+    display: none !important;
+  }
+  .mobile-nav-toggle {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+  }
+}
+
+/* Плавна анімація появи (Fade In) */
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInSlide 0.8s ease-out forwards;
+}
+
+
+.search-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.search-sidebar {
+  display: block;
+}
+
+.mobile-filter-btn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .search-layout {
+    grid-template-columns: 1fr; 
+  }
+  
+  .search-sidebar {
+    position: fixed !important; 
+    top: 0 !important;          
+    height: 100vh !important;  
+    left: -100%; 
+    width: 280px;
+    background: var(--surface);
+    z-index: 200;
+    transition: left 0.3s ease;
+    padding-top: 20px;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.1);
+  }
+  
+  .search-sidebar.open {
+    left: 0 !important; /* шоб виїжджало */
+  }
+  
+  .mobile-filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 199;
+    backdrop-filter: blur(2px);
+    animation: fadeInSlide 0.2s ease-out forwards;
+  }
+}
+
+@keyframes pulseSkeleton {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.skeleton-box {
+  background: var(--border); /* Світло-сірий колір */
+  border-radius: 8px;
+  animation: pulseSkeleton 1.5s infinite ease-in-out;
+}
+
+/* =========================================
+   ПРОФІЛЬ (Степер та Анімації)
+========================================= */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(15px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.step-container {
+  animation: slideInRight 0.3s ease-out forwards;
+}
+
+.progress-bg {
+  width: 100%;
+  height: 6px;
+  background: var(--border);
+  border-radius: 10px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 10px;
+  transition: width 0.3s ease-in-out;
+}

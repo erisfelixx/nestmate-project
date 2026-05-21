@@ -40,6 +40,9 @@ def invite_to_group(db: Session, group_id: int, inviter_id: int, invitee_user_id
     if not group or group.creator_id != inviter_id:
         return None, "Тільки засновник може запрошувати"
 
+    if len(group.members) >= group.target_size:
+        return None, "Група вже заповнена"
+
     already = db.query(GroupMember).filter(
         GroupMember.group_id == group_id,
         GroupMember.user_id == invitee_user_id
@@ -49,10 +52,28 @@ def invite_to_group(db: Session, group_id: int, inviter_id: int, invitee_user_id
 
     member = GroupMember(group_id=group_id, user_id=invitee_user_id)
     db.add(member)
+    
+    if len(group.members) + 1 >= group.target_size:
+        group.is_active_search = False
+        
     db.commit()
     return member, None
 
 def apply_to_group(db: Session, group_id: int, applicant_user_id: int):
+    group = db.query(Group).filter(Group.id == group_id).first()
+    if not group:
+        return None, "Групу не знайдено"
+
+    is_member = db.query(GroupMember).filter(
+        GroupMember.group_id == group_id,
+        GroupMember.user_id == applicant_user_id
+    ).first()
+    if is_member:
+        return None, "Ви вже є учасником цієї групи"
+
+    if len(group.members) >= group.target_size:
+        return None, "Група вже заповнена"
+
     existing = db.query(GroupRequest).filter(
         GroupRequest.group_id == group_id,
         GroupRequest.applicant_user_id == applicant_user_id
@@ -71,7 +92,9 @@ def respond_group_request(db: Session, request_id: int, user_id: int, accept: bo
     if not req:
         return None, "Запит не знайдено"
 
-    #перевіряємо що відповідає учасник групи
+    group = db.query(Group).filter(Group.id == req.group_id).first()
+
+    # перевіряємо що відповідає учасник групи
     is_member = db.query(GroupMember).filter(
         GroupMember.group_id == req.group_id,
         GroupMember.user_id == user_id
@@ -80,12 +103,18 @@ def respond_group_request(db: Session, request_id: int, user_id: int, accept: bo
         return None, "Немає доступу"
 
     if accept:
+        if len(group.members) >= group.target_size:
+            return None, "Група вже заповнена, немає вільних місць"
+
         req.status = "accepted"
         new_member = GroupMember(
             group_id=req.group_id,
             user_id=req.applicant_user_id
         )
         db.add(new_member)
+        
+        if len(group.members) + 1 >= group.target_size:
+            group.is_active_search = False
     else:
         req.status = "declined"
 
@@ -130,3 +159,20 @@ def get_active_groups(db: Session, skip: int = 0, limit: int = 20):
     return db.query(Group).filter(
         Group.is_active_search == True
     ).offset(skip).limit(limit).all()
+
+def leave_group(db: Session, user_id: int):
+    member = db.query(GroupMember).filter(GroupMember.user_id == user_id).first()
+    if not member:
+        return None, "Ви не є учасником жодної групи"
+
+    group = db.query(Group).filter(Group.id == member.group_id).first()
+
+    if group.creator_id == user_id:
+        return None, "Засновник не може просто вийти. Спочатку видаліть групу."
+
+    db.delete(member)
+
+    group.is_active_search = True
+
+    db.commit()
+    return True, None
