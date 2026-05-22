@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import api from '../api/axios'
 import ProfileModal from '../components/ProfileModal'
 import GroupModal from '../components/GroupModal'
-import { Search as SearchIcon, User, Users, SlidersHorizontal, X } from 'lucide-react'
+import { Search as SearchIcon, User, Users, SlidersHorizontal, X, Heart, Star, MapPin, BriefcaseBusiness } from 'lucide-react'
 
 const CITIES = [
   'Всі міста', 'Київ', 'Львів', 'Харків', 'Одеса', 'Дніпро',
@@ -32,8 +32,8 @@ export default function Search() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS)
   const [sortBy, setSortBy] = useState('compatibility')
   
-  const [activeTab, setActiveTab] = useState('individuals') // 'individuals' або 'groups'
-  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false) // Стан для мобільної шторки
+  const [activeTab, setActiveTab] = useState('individuals')
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false) 
 
   const [selected, setSelected] = useState(null)
   const [selectedGroup, setSelectedGroup] = useState(null)
@@ -107,24 +107,22 @@ export default function Search() {
 
   return (
     <div style={styles.root}>
-      {/* Затемнення фону при відкритій шторці */}
       {isMobileFiltersOpen && (
         <div className="sidebar-backdrop" onClick={() => setIsMobileFiltersOpen(false)} />
       )}
 
       <div className="search-layout">
 
-        {/* САЙДБАР — фільтри */}
+        {/* НОВИЙ САЙДБАР-КАРТКА */}
         <aside className={`search-sidebar ${isMobileFiltersOpen ? 'open' : ''}`} style={styles.sidebar}>
           <div style={styles.sidebarHeader}>
             <div style={styles.sidebarTitle}>Фільтри</div>
-            {/* Кнопка закриття (видно тільки на моб) */}
             <button 
               className="btn" 
-              style={{ padding: '4px', border: 'none', display: 'flex' }}
+              style={{ padding: '4px', border: 'none', display: 'flex', background: 'transparent' }}
               onClick={() => setIsMobileFiltersOpen(false)}
             >
-              <X size={20} className="mobile-close-icon" />
+              <X size={24} className="mobile-close-icon" color="var(--text-secondary)" />
             </button>
           </div>
 
@@ -153,7 +151,7 @@ export default function Search() {
               <FilterBlock label="Роль">
                 <FilterToggle
                   options={[
-                    { val: '', label: 'Всі' },
+                    { val: '', label: '👥 Всі' },
                     { val: 'looking', label: '🔍 Шукає' },
                     { val: 'hosting', label: '🏠 Здає' },
                   ]}
@@ -165,9 +163,9 @@ export default function Search() {
               <FilterBlock label="Стать">
                 <FilterToggle
                   options={[
-                    { val: '', label: 'Будь-яка' },
-                    { val: 'female', label: 'Жінка' },
-                    { val: 'male', label: 'Чоловік' },
+                    { val: '', label: '👥 Будь-яка' },
+                    { val: 'female', label: '👩 Жінка' },
+                    { val: 'male', label: '👨 Чоловік' },
                   ]}
                   value={filters.gender}
                   onChange={v => setFilter('gender', v)}
@@ -177,7 +175,7 @@ export default function Search() {
               <FilterBlock label="Режим дня">
                 <FilterToggle
                   options={[
-                    { val: '', label: 'Будь-який' },
+                    { val: '', label: '🕒 Будь-який' },
                     { val: 'early_bird', label: '🌅 Жайворонок' },
                     { val: 'night_owl', label: '🦉 Сова' },
                   ]}
@@ -225,7 +223,6 @@ export default function Search() {
           )}
 
           <button
-            className="btn"
             style={styles.resetBtn}
             onClick={() => {
               setFilters(DEFAULT_FILTERS);
@@ -239,7 +236,6 @@ export default function Search() {
         {/* ОСНОВНА ЧАСТИНА */}
         <main style={styles.main}>
 
-          {/* Мобільна кнопка виклику фільтрів */}
           <button className="mobile-filter-btn" onClick={() => setIsMobileFiltersOpen(true)}>
             <SlidersHorizontal size={18} />
             Фільтри та сортування
@@ -261,7 +257,6 @@ export default function Search() {
             </button>
           </div>
 
-          {/* Шапка результатів */}
           <div style={styles.mainHeader}>
             <h1 style={styles.mainTitle}>
               {loading ? 'Шукаємо...' : `${activeData.length} результатів`}
@@ -280,7 +275,6 @@ export default function Search() {
             </select>
           </div>
 
-          {/* Стан: помилка */}
           {error && (
             <div style={styles.errorBox}>
               {error === 'Спочатку створи профіль'
@@ -291,7 +285,7 @@ export default function Search() {
             </div>
           )}
 
-          {/* Стан: SKELETON LOADERS (Замість тексту завантаження) */}
+          {/* Стан: SKELETON LOADERS */}
           {loading && !error && (
             <div style={styles.grid}>
               {[...Array(6)].map((_, i) => (
@@ -362,35 +356,33 @@ export default function Search() {
 
 // ── Допоміжні компоненти ─────────────────────────────────────────
 
-// Скелетна картка завантаження
 function SkeletonCard() {
   return (
-    <div style={{ ...styles.card, borderColor: 'transparent', boxShadow: 'var(--shadow)' }}>
-      <div className="skeleton-box" style={{ width: '40px', height: '18px', borderRadius: '20px', marginBottom: '10px' }} />
-      <div style={styles.cardTop}>
-        <div className="skeleton-box" style={{ width: '38px', height: '38px', borderRadius: '50%' }} />
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <div className="skeleton-box" style={{ width: '60%', height: '14px' }} />
-          <div className="skeleton-box" style={{ width: '40%', height: '10px' }} />
+    <article style={{ ...styles.profileCard, borderColor: 'transparent', cursor: 'default' }}>
+      <div className="skeleton-box" style={{ width: '100px', height: '22px', borderRadius: '20px', marginBottom: '20px' }} />
+      <div style={styles.profileInfoRow}>
+        <div className="skeleton-box" style={{ width: '72px', height: '72px', borderRadius: '50%' }} />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '6px' }}>
+          <div className="skeleton-box" style={{ width: '70%', height: '18px', borderRadius: '8px' }} />
+          <div className="skeleton-box" style={{ width: '50%', height: '14px', borderRadius: '8px' }} />
+          <div className="skeleton-box" style={{ width: '60%', height: '14px', borderRadius: '8px' }} />
         </div>
       </div>
-      <div style={{ display: 'flex', gap: '5px', marginBottom: '10px' }}>
-        <div className="skeleton-box" style={{ width: '50px', height: '16px', borderRadius: '20px' }} />
-        <div className="skeleton-box" style={{ width: '70px', height: '16px', borderRadius: '20px' }} />
+      <div style={{ display: 'flex', gap: '8px', marginTop: '20px' }}>
+        <div className="skeleton-box" style={{ width: '70px', height: '26px', borderRadius: '20px' }} />
+        <div className="skeleton-box" style={{ width: '90px', height: '26px', borderRadius: '20px' }} />
       </div>
-      <div style={{ ...styles.cardFooter, borderTopColor: 'var(--bg)' }}>
-        <div className="skeleton-box" style={{ width: '30%', height: '14px' }} />
-        <div className="skeleton-box" style={{ width: '20%', height: '14px' }} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '24px' }}>
+        <div className="skeleton-box" style={{ width: '35%', height: '20px', borderRadius: '8px' }} />
+        <div className="skeleton-box" style={{ width: '100px', height: '34px', borderRadius: '14px' }} />
       </div>
-    </div>
+    </article>
   )
 }
 
 function MatchCard({ match, onClick }) {
   const compat = match.compatibility
-  const compatStyle = compat >= 80
-    ? { bg: '#EAF3DE', color: '#3B6D11' }
-    : { bg: '#FEF3E2', color: '#854F0B' }
+  const tone = compat >= 80 ? 'green' : 'yellow'
 
   const tags = [
     match.schedule === 'early_bird' ? '🌅 Жайворонок' : match.schedule === 'night_owl' ? '🦉 Сова' : null,
@@ -401,32 +393,94 @@ function MatchCard({ match, onClick }) {
   ].filter(Boolean).slice(0, 3)
 
   return (
-    <div style={styles.card} onClick={onClick}>
-      <div style={{ ...styles.compatBadge, background: compatStyle.bg, color: compatStyle.color }}>
-        {compat}%
+    <article style={styles.profileCard} onClick={onClick}>
+      <div style={styles.profileHeader}>
+        <span style={styles.profileBadge(tone)}>
+          {tone === 'green' ? <Heart size={12} fill="currentColor" /> : <Star size={12} fill="currentColor" />}
+          {compat}% сумісності
+        </span>
       </div>
-      <div style={styles.cardTop}>
+
+      <div style={styles.profileInfoRow}>
         {match.photo_url
-          ? <img src={match.photo_url} style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }} alt="Avatar" />
-          : <div style={styles.cardAvatar}>{match.name?.[0] || '?'}</div>
+          ? <img src={match.photo_url} style={styles.profileAvatar} alt={match.name} />
+          : <div style={styles.profileAvatarPlaceholder}>{match.name?.[0] || '?'}</div>
         }
-        <div>
-          <div style={styles.cardName}>{match.name}, {match.age}</div>
-          <div style={styles.cardCity}>
-            {match.city} · {match.role === 'looking' ? 'шукає' : 'здає'}
+        <div style={{ minWidth: 0, paddingTop: '6px' }}>
+          <h3 style={styles.profileName}>{match.name}, {match.age}</h3>
+          <div style={styles.profileMetaList}>
+            <p style={styles.profileMetaItem}>
+              <MapPin size={15} color="var(--accent)" /> {match.city}
+            </p>
+            <p style={styles.profileMetaItem}>
+              <BriefcaseBusiness size={15} color="var(--accent)" /> {match.role === 'looking' ? 'Шукає кімнату' : 'Здає кімнату'}
+            </p>
           </div>
         </div>
       </div>
-      <div style={styles.pills}>
-        {tags.map(t => <span key={t} style={styles.pill}>{t}</span>)}
+
+      <div style={styles.profileTagList}>
+        {tags.map(t => <span key={t} style={styles.profileTag}>{t}</span>)}
       </div>
-      <div style={styles.cardFooter}>
-        <span style={styles.budget}>
-          до <strong>{match.budget_max ? `${match.budget_max} ₴` : '—'}</strong>
-        </span>
-        <span style={styles.viewHint}>Відкрити →</span>
+
+      <div style={styles.profileFooter}>
+        <p style={styles.profilePrice}>
+          до {match.budget_max ? `${match.budget_max} ₴` : '—'}
+        </p>
+        <button style={styles.profileBtn}>Відкрити</button>
       </div>
-    </div>
+    </article>
+  )
+}
+
+function GroupCard({ group, onClick }) {
+  const compat = group.compatibility
+  const tone = compat >= 75 ? 'green' : 'yellow'
+
+  return (
+    <article style={{ ...styles.profileCard, borderLeft: '4px solid var(--accent)' }} onClick={onClick}>
+      <div style={styles.profileHeader}>
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          <span style={{ ...styles.profileBadge('default'), background: 'var(--accent-secondary)', color: 'var(--accent)', border: '1px solid transparent' }}>
+            👥 Група
+          </span>
+          <span style={styles.profileBadge(tone)}>
+            {tone === 'green' ? <Heart size={12} fill="currentColor" /> : <Star size={12} fill="currentColor" />}
+            {compat}%
+          </span>
+        </div>
+      </div>
+
+      <div style={styles.profileInfoRow}>
+        <div style={styles.profileAvatarPlaceholder}>
+          <Users size={30} />
+        </div>
+        <div style={{ minWidth: 0, paddingTop: '6px' }}>
+          <h3 style={styles.profileName}>{group.name}</h3>
+          <div style={styles.profileMetaList}>
+            <p style={styles.profileMetaItem}>
+              <MapPin size={15} color="var(--accent)" /> {group.city}
+            </p>
+            <p style={styles.profileMetaItem}>
+              <User size={15} color="var(--accent)" /> {group.current_size}/{group.target_size} учасники
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div style={styles.profileTagList}>
+        {group.members.map(m => (
+          <span key={m.name} style={styles.profileTag}>{m.name}, {m.age}</span>
+        ))}
+      </div>
+
+      <div style={styles.profileFooter}>
+        <p style={styles.profilePrice}>
+          до {group.budget_max ? `${group.budget_max} ₴` : '—'}
+        </p>
+        <button style={styles.profileBtn}>Відкрити</button>
+      </div>
+    </article>
   )
 }
 
@@ -455,47 +509,6 @@ function FilterToggle({ options, value, onChange }) {
   )
 }
 
-function GroupCard({ group, onClick }) {
-  const compat = group.compatibility
-  const compatStyle = compat >= 75
-    ? { bg: '#EAF3DE', color: '#3B6D11' }
-    : { bg: '#FAEEDA', color: '#854F0B' }
-
-  return (
-    <div
-      style={{ ...styles.card, borderLeft: '3px solid #7C5CBF' }}
-      onClick={onClick}
-    >
-      <div style={{ ...styles.compatBadge, background: '#EDE8F8', color: '#534AB7' }}>
-        👥 Група
-      </div>
-      <div style={{ ...styles.compatBadge, ...compatStyle, marginLeft: '6px' }}>
-        {compat}%
-      </div>
-
-      <div style={{ margin: '10px 0' }}>
-        <div style={styles.cardName}>{group.name}</div>
-        <div style={styles.cardCity}>
-          {group.city} · {group.current_size}/{group.target_size} учасники
-        </div>
-      </div>
-
-      <div style={styles.pills}>
-        {group.members.map(m => (
-          <span key={m.name} style={styles.pill}>{m.name}, {m.age}</span>
-        ))}
-      </div>
-
-      <div style={styles.cardFooter}>
-        <span style={styles.budget}>
-          до <strong>{group.budget_max ? `${group.budget_max} ₴` : '—'}</strong>
-        </span>
-        <span style={styles.viewHint}>Відкрити →</span>
-      </div>
-    </div>
-  )
-}
-
 // ── Стилі ────────────────────────────────────────────────────────
 
 const styles = {
@@ -503,75 +516,86 @@ const styles = {
     minHeight: '100vh',
     background: 'var(--bg)',
   },
+  
+  // ОНОВЛЕНИЙ САЙДБАР
   sidebar: {
-    borderRight: '1px solid var(--border)',
-    padding: '1.5rem 1.25rem',
+    alignSelf: 'start',
+    background: 'var(--surface)',
+    border: '1px solid var(--border)',
+    borderRadius: '24px',
+    padding: '24px',
+    boxShadow: '0 18px 50px rgba(45, 35, 95, 0.08)',
+    position: 'sticky',
+    top: '96px', 
+    maxHeight: 'calc(100vh - 120px)',
+    overflowY: 'auto',
     display: 'flex',
     flexDirection: 'column',
-    gap: '1rem',
-    position: 'sticky',
-    top: '57px',
-    height: 'calc(100vh - 57px)',
-    overflowY: 'auto',
+    /* borderRight ВИДАЛЕНО, щоб не було жорсткої лінії */
   },
   sidebarHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '4px',
+    marginBottom: '26px',
   },
   sidebarTitle: {
     fontFamily: 'DM Serif Display, serif',
-    fontSize: '18px',
+    fontSize: '28px',
+    fontWeight: 700,
+    color: 'var(--text)',
   },
   filterBlock: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px',
+    marginBottom: '24px',
   },
   filterLabel: {
-    fontSize: '11px',
-    fontWeight: '600',
-    color: 'var(--text-secondary)',
+    display: 'block',
+    marginBottom: '10px',
+    fontSize: '12px',
+    fontWeight: 800,
+    letterSpacing: '0.06em',
     textTransform: 'uppercase',
-    letterSpacing: '0.5px',
+    color: 'var(--text-secondary)',
   },
   select: {
     width: '100%',
-    padding: '10px 12px',
-    minHeight: '44px',
-    borderRadius: '8px',
+    height: '48px',
+    padding: '0 16px',
+    borderRadius: '14px',
     border: '1px solid var(--border)',
-    background: 'var(--surface)',
+    background: 'var(--bg)',
     color: 'var(--text)',
     fontSize: '14px',
     fontFamily: 'Manrope, sans-serif',
+    outline: 'none',
   },
   input: {
     width: '100%',
-    padding: '10px 12px',
-    minHeight: '44px',
-    borderRadius: '8px',
+    height: '48px',
+    padding: '0 16px',
+    borderRadius: '14px',
     border: '1px solid var(--border)',
-    background: 'var(--surface)',
+    background: 'var(--bg)',
     color: 'var(--text)',
     fontSize: '14px',
     fontFamily: 'Manrope, sans-serif',
+    outline: 'none',
   },
   toggleGroup: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px',
+    gap: '8px',
   },
   toggleBtn: (active) => ({
-    padding: '10px 12px',
-    minHeight: '40px',
-    borderRadius: '7px',
+    width: '100%',
+    height: '44px',
+    padding: '0 16px',
+    borderRadius: '14px',
     border: `1px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
-    background: active ? 'var(--accent-secondary)' : 'transparent',
-    color: active ? 'var(--accent)' : 'var(--text-secondary)',
-    fontSize: '13px',
-    fontWeight: '500',
+    background: active ? 'var(--accent)' : 'var(--surface)',
+    color: active ? '#fff' : 'var(--text-secondary)',
+    fontSize: '14px',
+    fontWeight: active ? 700 : 600,
     cursor: 'pointer',
     textAlign: 'left',
     fontFamily: 'Manrope, sans-serif',
@@ -580,49 +604,52 @@ const styles = {
   checkRow: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
-    fontSize: '13px',
+    gap: '12px',
+    fontSize: '14px',
     color: 'var(--text-secondary)',
+    fontWeight: 600,
     cursor: 'pointer',
-    minHeight: '34px',
+    marginBottom: '12px',
   },
   checkbox: {
     accentColor: 'var(--accent)',
-    width: '18px',
-    height: '18px',
+    width: '20px',
+    height: '20px',
     cursor: 'pointer',
   },
   resetBtn: {
     width: '100%',
-    fontSize: '13px',
-    padding: '10px',
-    marginTop: '4px',
+    height: '48px',
+    borderRadius: '14px',
+    border: '1px solid var(--border)',
+    background: 'transparent',
     color: 'var(--text-secondary)',
-    minHeight: '44px',
+    fontSize: '14px',
+    fontWeight: 700,
+    cursor: 'pointer',
+    marginTop: '8px'
   },
 
   main: {
-    padding: '1.5rem',
+    padding: '1.5rem 0',
   },
   tabsContainer: {
     display: 'flex',
     gap: '12px',
     marginBottom: '1.5rem',
-    borderBottom: '1px solid var(--border)',
-    paddingBottom: '10px',
   },
   tab: (active) => ({
     display: 'flex',
     alignItems: 'center',
-    gap: '6px',
-    background: active ? 'var(--accent)' : 'transparent',
+    gap: '8px',
+    background: active ? 'var(--accent)' : 'var(--surface)',
     color: active ? '#fff' : 'var(--text-secondary)',
     border: `1px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
-    padding: '8px 16px',
-    minHeight: '40px',
-    borderRadius: '20px',
+    padding: '8px 20px',
+    minHeight: '44px',
+    borderRadius: '14px',
     fontSize: '14px',
-    fontWeight: '600',
+    fontWeight: '700',
     cursor: 'pointer',
     transition: 'all 0.2s',
   }),
@@ -630,26 +657,27 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '1.25rem',
+    marginBottom: '2rem',
     flexWrap: 'wrap',
     gap: '10px',
   },
   mainTitle: {
     fontFamily: 'DM Serif Display, serif',
-    fontSize: '22px',
+    fontSize: '26px',
     fontWeight: 400,
   },
   cityTag: {
     color: 'var(--accent)',
   },
   sortSelect: {
-    padding: '8px 12px',
-    minHeight: '40px',
-    borderRadius: '8px',
+    padding: '0 16px',
+    height: '44px',
+    borderRadius: '14px',
     border: '1px solid var(--border)',
     background: 'var(--surface)',
     color: 'var(--text)',
-    fontSize: '13px',
+    fontSize: '14px',
+    fontWeight: 600,
     fontFamily: 'Manrope, sans-serif',
   },
 
@@ -657,7 +685,7 @@ const styles = {
     background: 'var(--accent-secondary)',
     color: 'var(--accent)',
     padding: '14px 18px',
-    borderRadius: '10px',
+    borderRadius: '14px',
     fontSize: '14px',
     marginBottom: '1rem',
   },
@@ -674,81 +702,67 @@ const styles = {
 
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-    gap: '14px',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', 
+    gap: '20px', 
   },
-  card: {
-    background: 'var(--surface)',
+
+  profileCard: {
+    borderRadius: '24px', 
     border: '1px solid var(--border)',
-    borderRadius: '12px',
-    padding: '1.25rem',
+    background: 'var(--surface)',
+    padding: '1.25rem', 
+    boxShadow: 'var(--shadow)',
     cursor: 'pointer',
-    transition: 'border-color 0.15s, transform 0.15s',
-    position: 'relative',
+    transition: 'transform 0.2s',
   },
-  compatBadge: {
-    display: 'inline-block',
-    fontSize: '11px',
-    fontWeight: '600',
-    padding: '4px 10px',
-    borderRadius: '20px',
-    marginBottom: '12px',
-  },
-  cardTop: {
+  profileHeader: {
+    marginBottom: '1.25rem',
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
-    marginBottom: '12px',
-  },
-  cardAvatar: {
-    width: '42px',
-    height: '42px',
-    borderRadius: '50%',
-    background: 'var(--accent-secondary)',
-    color: 'var(--accent)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontFamily: 'DM Serif Display, serif',
-    fontSize: '18px',
-    flexShrink: 0,
-  },
-  cardName: {
-    fontSize: '15px',
-    fontWeight: '600',
-  },
-  cardCity: {
-    fontSize: '12px',
-    color: 'var(--text-secondary)',
-  },
-  pills: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '6px',
-    marginBottom: '14px',
-  },
-  pill: {
-    background: 'var(--accent-secondary)',
-    color: 'var(--accent)',
-    fontSize: '11px',
-    padding: '4px 10px',
-    borderRadius: '20px',
-    fontWeight: '500',
-  },
-  cardFooter: {
-    display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    borderTop: '1px solid var(--border)',
-    paddingTop: '12px',
   },
-  budget: {
-    fontSize: '13px',
-    color: 'var(--text-secondary)',
+  profileBadge: (tone) => {
+    if (tone === 'default') {
+      return {
+        display: 'inline-flex', alignItems: 'center', gap: '4px', borderRadius: '50px', padding: '4px 10px', fontSize: '11px', fontWeight: 'bold'
+      }
+    }
+    return {
+      display: 'inline-flex', alignItems: 'center', gap: '4px', borderRadius: '50px', padding: '4px 10px', fontSize: '11px', fontWeight: 'bold',
+      background: tone === 'green' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+      color: tone === 'green' ? '#047857' : '#b45309',
+      border: `1px solid ${tone === 'green' ? '#d1fae5' : '#fef3c7'}`
+    }
   },
-  viewHint: {
-    fontSize: '13px',
-    color: 'var(--accent)',
-    fontWeight: '600',
+  profileInfoRow: { display: 'flex', gap: '1rem' },
+  profileAvatar: { 
+    height: '72px', 
+    width: '72px', 
+    flexShrink: 0, 
+    borderRadius: '50%', 
+    objectFit: 'cover', 
+    border: '3px solid var(--border)' 
   },
+  profileAvatarPlaceholder: { 
+    height: '72px', 
+    width: '72px', 
+    flexShrink: 0, 
+    borderRadius: '50%', 
+    border: '3px solid var(--border)', 
+    background: 'var(--accent-secondary)', 
+    color: 'var(--accent)', 
+    display: 'flex', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    fontFamily: 'DM Serif Display, serif', 
+    fontSize: '28px' 
+  },
+  profileName: { fontSize: '18px', fontWeight: 'bold', color: 'var(--text)', margin: 0 },
+  profileMetaList: { marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px', fontWeight: '500', color: 'var(--text-secondary)' },
+  profileMetaItem: { display: 'flex', alignItems: 'center', gap: '6px', margin: 0 },
+  profileTagList: { marginTop: '1.25rem', display: 'flex', flexWrap: 'wrap', gap: '8px' },
+  profileTag: { borderRadius: '50px', border: '1px solid var(--border)', background: 'var(--surface)', padding: '6px 12px', fontSize: '12px', fontWeight: '600', color: 'var(--accent)' },
+  profileFooter: { marginTop: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' },
+  profilePrice: { whiteSpace: 'nowrap', fontSize: '18px', fontWeight: '800', color: 'var(--text)', margin: 0 },
+  profileBtn: { borderRadius: '14px', background: 'var(--accent)', padding: '8px 16px', fontSize: '13px', fontWeight: 'bold', color: '#FFFFFF', border: 'none', cursor: 'pointer', boxShadow: '0 8px 24px rgba(124,92,191,0.25)' },
 }

@@ -15,7 +15,7 @@ export default function Navbar() {
   const location = useLocation()
 
   const [hasRequests, setHasRequests] = useState(false)
-  
+
   useEffect(() => {
     if (user) {
       api.get('/contacts/incoming')
@@ -68,7 +68,7 @@ export default function Navbar() {
                 }}
                 onClick={() => handleNav('/profile')}
               >
-                <User size={18} /> Мій профіль 
+                <User size={18} /> Мій профіль
                 {hasRequests && <span style={styles.notificationDot} />}
               </button>
             </>
@@ -95,8 +95,8 @@ export default function Navbar() {
         </div>
 
         {/* Кнопка мобільного меню */}
-        <button 
-          className="mobile-nav-toggle" 
+        <button
+          className="mobile-nav-toggle"
           style={styles.mobileToggleBtn}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
@@ -119,7 +119,7 @@ export default function Navbar() {
               <hr style={styles.divider} />
             </>
           )}
-          
+
           <div style={{ display: 'flex', gap: '10px', marginTop: '10px', padding: '0 10px' }}>
             <button style={styles.iconBtn} onClick={toggleTheme}>
               {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
@@ -152,7 +152,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: '0.85rem 1.5rem',
+    padding: '0.85rem 3rem',
     borderBottom: '1px solid var(--border)',
     background: 'var(--surface)',
     position: 'sticky',
@@ -161,9 +161,11 @@ const styles = {
   },
   logo: {
     fontFamily: 'DM Serif Display, serif',
-    fontSize: '22px', 
+    fontSize: '30px',
+    fontWeight: 700,
     cursor: 'pointer',
-    letterSpacing: '-0.3px',
+    letterSpacing: '-0.7px',
+    lineHeight: 1,
   },
   logoAccent: {
     color: 'var(--accent)',

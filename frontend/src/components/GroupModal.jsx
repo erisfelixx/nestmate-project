@@ -23,13 +23,12 @@ export default function GroupModal({ group, onClose }) {
   }
 
   const handleMemberClick = async (userId) => {
-    if (!userId) return // Захист від порожнього ID
+    if (!userId) return 
     setProfileLoading(true)
     try {
       const res = await api.get(`/profiles/user/${userId}`)
       setSelectedProfile({ ...res.data, user_id: userId })
     } catch {
-      // якщо профіль не знайдено, можна нічого не робити або вивести помилку
       console.error("Профіль не знайдено")
     } finally {
       setProfileLoading(false)
@@ -42,7 +41,7 @@ export default function GroupModal({ group, onClose }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" style={s.modal} onClick={e => e.stopPropagation()}>
 
-        {/* Шапка */}
+        {/* Шапка зі збільшеною іконкою групи */}
         <div style={s.header}>
           <div style={s.headerIcon}>👥</div>
           <div style={s.headerInfo}>
@@ -179,7 +178,7 @@ export default function GroupModal({ group, onClose }) {
 
 const s = {
   modal: {
-    maxWidth: '500px',
+    maxWidth: '520px',
     width: '92%',
     maxHeight: '85vh',
     overflowY: 'auto',
@@ -188,8 +187,8 @@ const s = {
   header: {
     display: 'flex',
     alignItems: 'flex-start',
-    gap: '14px',
-    padding: '1.5rem',
+    gap: '24px',
+    padding: '2rem 2.25rem',
     borderBottom: '1px solid var(--border)',
     position: 'sticky',
     top: 0,
@@ -197,51 +196,73 @@ const s = {
     zIndex: 1,
   },
   headerIcon: {
-    width: '52px', height: '52px',
+    width: '104px',
+    height: '104px',
     borderRadius: '50%',
-    background: '#EDE8F8',
-    display: 'flex', alignItems: 'center',
+    background: 'var(--accent-secondary)',
+    color: 'var(--accent)',
+    display: 'flex',
+    alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '22px', flexShrink: 0,
+    fontSize: '42px',
+    flexShrink: 0,
+    border: '4px solid var(--border)',
   },
   headerInfo: {
     flex: 1,
-    display: 'flex', flexDirection: 'column', gap: '4px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    paddingTop: '4px',
   },
   title: {
     fontFamily: 'DM Serif Display, serif',
-    fontSize: '20px', fontWeight: 400,
+    fontSize: '32px',
+    fontWeight: 400,
+    margin: 0,
   },
   subtitle: {
-    fontSize: '13px', color: 'var(--text-secondary)',
+    fontSize: '14px',
+    color: 'var(--text-secondary)',
   },
   badges: {
-    display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px',
+    display: 'flex',
+    gap: '8px',
+    flexWrap: 'wrap',
+    marginTop: '4px',
   },
   badge: {
-    background: '#EDE8F8', color: '#534AB7',
-    fontSize: '11px', fontWeight: '500',
-    padding: '3px 10px', borderRadius: '20px',
-  },
-  spotsbage: {
-    background: '#EAF3DE', color: '#3B6D11',
-    fontSize: '11px', fontWeight: '500',
-    padding: '3px 10px', borderRadius: '20px',
+    background: '#EDE8F8',
+    color: '#534AB7',
+    fontSize: '12px',
+    fontWeight: '500',
+    padding: '4px 12px',
+    borderRadius: '20px',
   },
   spotsbadge: {
-    background: '#EAF3DE', color: '#3B6D11',
-    fontSize: '11px', fontWeight: '500',
-    padding: '3px 10px', borderRadius: '20px',
+    background: '#EAF3DE',
+    color: '#3B6D11',
+    fontSize: '12px',
+    fontWeight: '500',
+    padding: '4px 12px',
+    borderRadius: '20px',
   },
   closeBtn: {
-    border: 'none', background: 'transparent',
+    border: 'none',
+    background: 'transparent',
     color: 'var(--text-secondary)',
-    fontSize: '18px', padding: '4px 8px',
-    borderRadius: '6px', cursor: 'pointer', flexShrink: 0,
+    fontSize: '20px',
+    padding: '4px 8px',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    flexShrink: 0,
+    marginTop: '4px',
   },
   body: {
-    padding: '1.25rem 1.5rem',
-    display: 'flex', flexDirection: 'column', gap: '1.1rem',
+    padding: '1.25rem 2.25rem 2.25rem',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.25rem',
   },
   compatRow: {
     display: 'flex', alignItems: 'center', gap: '14px',
@@ -277,7 +298,7 @@ const s = {
   },
   memberAvatar: {
     width: '36px', height: '36px', borderRadius: '50%',
-    background: '#EDE8F8', color: '#534AB7',
+    background: 'var(--accent-secondary)', color: 'var(--accent)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     fontFamily: 'DM Serif Display, serif', fontSize: '16px',
     margin: '0 auto 6px',
@@ -311,7 +332,7 @@ const s = {
   barFill: (val) => ({
     height: '100%', borderRadius: '10px',
     width: `${val}%`,
-    background: val >= 75 ? '#639922' : val >= 55 ? '#BA7517' : '#E24B4A',
+    background: val >= 75 ? '#6DBB3A' : val >= 55 ? '#F0A500' : '#E05050',
     transition: 'width 0.4s ease',
   }),
   barVal: {
@@ -319,7 +340,7 @@ const s = {
     width: '32px', textAlign: 'right',
   },
   applyBtn: {
-    width: '100%', padding: '12px',
+    width: '100%', padding: '14px',
     fontSize: '14px', fontWeight: '600',
     borderRadius: '10px', marginTop: '4px',
   },

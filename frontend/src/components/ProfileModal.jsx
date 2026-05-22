@@ -31,10 +31,10 @@ export default function ProfileModal({ profile, onClose, zIndex = 100 }) {
         style={styles.modal}
         onClick={e => e.stopPropagation()}
       >
-        {/* Шапка */}
+        {/* Шапка зі збільшеним фото */}
         <div style={styles.header}>
           {profile.photo_url
-            ? <img src={profile.photo_url} style={{ width: '52px', height: '52px', borderRadius: '50%', objectFit: 'cover' }} alt="Avatar" />
+            ? <img src={profile.photo_url} style={styles.headerPhoto} alt="Avatar" />
             : <div style={styles.avatar}>{profile.name?.[0] || '?'}</div>
           }
           <div style={styles.headerInfo}>
@@ -181,17 +181,25 @@ const styles = {
   header: {
     display: 'flex',
     alignItems: 'flex-start',
-    gap: '14px',
-    padding: '1.5rem',
+    gap: '24px',
+    padding: '2rem 2.25rem',
     borderBottom: '1px solid var(--border)',
     position: 'sticky',
     top: 0,
     background: 'var(--surface)',
     zIndex: 1,
   },
+  headerPhoto: {
+    width: '104px',
+    height: '104px',
+    borderRadius: '50%',
+    objectFit: 'cover',
+    flexShrink: 0,
+    border: '4px solid var(--accent-secondary)',
+  },
   avatar: {
-    width: '52px',
-    height: '52px',
+    width: '104px',
+    height: '104px',
     borderRadius: '50%',
     background: 'var(--accent-secondary)',
     color: 'var(--accent)',
@@ -199,29 +207,32 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     fontFamily: 'DM Serif Display, serif',
-    fontSize: '22px',
+    fontSize: '42px',
     flexShrink: 0,
+    border: '4px solid var(--border)',
   },
   headerInfo: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px',
+    gap: '8px',
+    paddingTop: '4px',
   },
   name: {
     fontFamily: 'DM Serif Display, serif',
-    fontSize: '22px',
+    fontSize: '32px',
     fontWeight: 400,
+    margin: 0,
   },
   city: {
-    fontSize: '13px',
+    fontSize: '14px',
     color: 'var(--text-secondary)',
   },
   compatBadge: {
     display: 'inline-block',
     fontSize: '12px',
     fontWeight: '500',
-    padding: '3px 10px',
+    padding: '4px 12px',
     borderRadius: '20px',
     marginTop: '2px',
     width: 'fit-content',
@@ -230,17 +241,18 @@ const styles = {
     border: 'none',
     background: 'transparent',
     color: 'var(--text-secondary)',
-    fontSize: '18px',
+    fontSize: '20px',
     padding: '4px 8px',
     borderRadius: '6px',
     cursor: 'pointer',
     flexShrink: 0,
+    marginTop: '4px',
   },
   body: {
-    padding: '1.25rem 1.5rem',
+    padding: '1.25rem 2.25rem 2.25rem',
     display: 'flex',
     flexDirection: 'column',
-    gap: '1.1rem',
+    gap: '1.25rem',
   },
   block: {
     display: 'flex',
@@ -268,7 +280,7 @@ const styles = {
     background: 'var(--bg)',
     border: '1px solid var(--border)',
     borderRadius: '8px',
-    padding: '8px 12px',
+    padding: '10px 12px',
     display: 'flex',
     flexDirection: 'column',
     gap: '2px',
@@ -316,7 +328,7 @@ const styles = {
   },
   requestBtn: {
     width: '100%',
-    padding: '12px',
+    padding: '14px',
     fontSize: '14px',
     fontWeight: '600',
     borderRadius: '10px',
@@ -340,7 +352,7 @@ const styles = {
   contactBox: {
     background: '#EDE8F8',
     border: '1px solid #7C5CBF',
-    padding: '12px',
+    padding: '14px',
     borderRadius: '10px',
     textAlign: 'center',
     marginTop: '4px'

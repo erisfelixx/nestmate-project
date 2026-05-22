@@ -12,6 +12,10 @@
   --radius: 12px;
   --radius-sm: 8px;
   --shadow: 0 2px 12px rgba(124,92,191,0.08);
+  --hero-overlay: rgba(247, 246, 252, 0.68);
+  --floating-card-bg: rgba(255, 255, 255, 0.94);
+  --floating-card-inner-bg: rgba(255, 255, 255, 0.96);
+  --floating-card-shadow: 0 26px 70px rgba(45, 35, 95, 0.14);
 }
 
 [data-theme="dark"] {
@@ -24,9 +28,17 @@
   --text-secondary: #9E98B8;
   --border: #2E2A3E;
   --shadow: 0 2px 12px rgba(0,0,0,0.3);
+  --hero-overlay: rgba(8, 7, 13, 0.74);
+  --floating-card-bg: rgba(34, 32, 46, 0.94);
+  --floating-card-inner-bg: rgba(28, 26, 39, 0.96);
+  --floating-card-shadow: 0 28px 80px rgba(0, 0, 0, 0.46);
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 body {
   font-family: 'Manrope', sans-serif;
@@ -37,7 +49,9 @@ body {
   transition: background 0.2s, color 0.2s;
 }
 
-.serif { font-family: 'DM Serif Display', serif; }
+.serif {
+  font-family: 'DM Serif Display', serif;
+}
 
 button {
   cursor: pointer;
@@ -55,7 +69,9 @@ button {
   font-weight: 500;
 }
 
-.btn:hover { background: var(--accent-secondary); }
+.btn:hover {
+  background: var(--accent-secondary);
+}
 
 .btn-primary {
   background: var(--accent);
@@ -63,7 +79,10 @@ button {
   color: #fff;
 }
 
-.btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.btn-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
 
 .loading {
   display: flex;
@@ -76,7 +95,7 @@ button {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(24,23,31,0.5);
+  background: rgba(24, 23, 31, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -96,14 +115,34 @@ button {
   animation: slideUp 0.2s ease;
 }
 
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
 
 /* Адаптація навігації */
 @media (max-width: 768px) {
   .desktop-nav {
     display: none !important;
   }
+
   .mobile-nav-toggle {
     display: flex !important;
     align-items: center;
@@ -118,6 +157,7 @@ button {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -131,9 +171,11 @@ button {
 
 .search-layout {
   display: grid;
-  grid-template-columns: 220px 1fr;
-  max-width: 1100px;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 32px;
+  max-width: 1280px;
   margin: 0 auto;
+  padding: 28px 32px 64px;
 }
 
 .search-sidebar {
@@ -147,25 +189,29 @@ button {
 @media (max-width: 768px) {
   .search-layout {
     grid-template-columns: 1fr; 
+    padding: 16px;
   }
-  
+
   .search-sidebar {
     position: fixed !important; 
     top: 0 !important;          
     height: 100vh !important;  
+    max-height: 100vh !important;
     left: -100%; 
-    width: 280px;
+    width: 280px !important;
+    border-radius: 0 !important;
     background: var(--surface);
     z-index: 200;
     transition: left 0.3s ease;
     padding-top: 20px;
     box-shadow: 2px 0 12px rgba(0,0,0,0.1);
   }
-  
+
   .search-sidebar.open {
-    left: 0 !important; /* шоб виїжджало */
+    left: 0 !important;
+    /* шоб виїжджало */
   }
-  
+
   .mobile-filter-btn {
     display: flex;
     align-items: center;
@@ -186,7 +232,7 @@ button {
   .sidebar-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.4);
+    background: rgba(0, 0, 0, 0.4);
     z-index: 199;
     backdrop-filter: blur(2px);
     animation: fadeInSlide 0.2s ease-out forwards;
@@ -194,12 +240,20 @@ button {
 }
 
 @keyframes pulseSkeleton {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
 }
 
 .skeleton-box {
-  background: var(--border); /* Світло-сірий колір */
+  background: var(--border);
+  /* Світло-сірий колір */
   border-radius: 8px;
   animation: pulseSkeleton 1.5s infinite ease-in-out;
 }
@@ -208,8 +262,15 @@ button {
    ПРОФІЛЬ (Степер та Анімації)
 ========================================= */
 @keyframes slideInRight {
-  from { opacity: 0; transform: translateX(15px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .step-container {
@@ -230,4 +291,30 @@ button {
   background: var(--accent);
   border-radius: 10px;
   transition: width 0.3s ease-in-out;
+}
+
+.reveal-section {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+  will-change: opacity, transform;
+}
+
+.reveal-section.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-15px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
 }
