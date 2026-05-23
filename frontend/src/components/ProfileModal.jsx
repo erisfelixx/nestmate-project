@@ -5,6 +5,23 @@ export default function ProfileModal({ profile, onClose, zIndex = 100 }) {
   const [requested, setRequested] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [aiAnalysis, setAiAnalysis] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState(false)
+
+  const fetchAiAnalysis = async () => {
+    if (!profile.user_id) return
+    setAiLoading(true)
+    setAiError(false)
+    try {
+      const res = await api.get(`/matches/analyze/${profile.user_id}`)
+      setAiAnalysis(res.data.analysis)
+    } catch {
+      setAiError(true)
+    } finally {
+      setAiLoading(false)
+    }
+  }
 
   const handleRequest = async () => {
     console.log('Надсилаємо запит до user_id:', profile.user_id)
@@ -133,6 +150,55 @@ export default function ProfileModal({ profile, onClose, zIndex = 100 }) {
               ))}
             </div>
           )}
+
+          {/* AI-аналіз */}
+          <div style={styles.block}>
+            <div style={styles.blockLabel}>AI-аналіз сумісності</div>
+
+            {!aiAnalysis && !aiLoading && (
+              <button
+                className="btn"
+                style={styles.aiBtn}
+                onClick={fetchAiAnalysis}
+              >
+                ✨ Згенерувати аналіз
+              </button>
+            )}
+
+            {aiLoading && (
+              <div style={styles.aiLoading}>
+                <div style={styles.aiLoadingDots}>
+                  <span style={styles.dot(0)} />
+                  <span style={styles.dot(1)} />
+                  <span style={styles.dot(2)} />
+                </div>
+                <span>Аналізуємо сумісність...</span>
+              </div>
+            )}
+
+            {aiError && (
+              <div style={styles.aiErrorMsg}>
+                Не вдалося отримати аналіз.
+                <span style={styles.retryLink} onClick={fetchAiAnalysis}> Спробувати ще раз</span>
+              </div>
+            )}
+
+            {aiAnalysis && (
+              <div style={styles.aiBox}>
+                {aiAnalysis.split('\n').filter(l => l.trim()).map((line, i) => (
+                  <div key={i} style={styles.aiLine(i)}>
+                    {line}
+                  </div>
+                ))}
+                <button
+                  style={styles.regenerateBtn}
+                  onClick={() => { setAiAnalysis(''); fetchAiAnalysis() }}
+                >
+                  🔄 Оновити
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Помилка */}
           {error && <div style={styles.errorMsg}>{error}</div>}
@@ -362,5 +428,70 @@ const styles = {
     fontWeight: '600',
     color: '#534AB7',
     marginTop: '4px'
+  },
+  aiBtn: {
+    fontSize: '13px',
+    padding: '9px 18px',
+    alignSelf: 'flex-start',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+  },
+  aiLoading: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    fontSize: '13px',
+    color: 'var(--text-secondary)',
+    padding: '10px 0',
+  },
+  aiLoadingDots: {
+    display: 'flex',
+    gap: '4px',
+  },
+  dot: (i) => ({
+    width: '6px',
+    height: '6px',
+    borderRadius: '50%',
+    background: 'var(--accent)',
+    display: 'inline-block',
+    animation: `pulseSkeleton 1.2s ease-in-out ${i * 0.2}s infinite`,
+  }),
+  aiBox: {
+    background: 'var(--accent-secondary)',
+    border: '1px solid var(--border)',
+    borderRadius: '12px',
+    padding: '1rem 1.1rem',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  aiLine: (i) => ({
+    fontSize: '13px',
+    lineHeight: 1.6,
+    color: i === 2 ? 'var(--accent)' : 'var(--text)',
+    fontWeight: i === 2 ? '500' : '400',
+    paddingBottom: i < 2 ? '8px' : '0',
+    borderBottom: i < 2 ? '1px solid var(--border)' : 'none',
+  }),
+  aiErrorMsg: {
+    fontSize: '13px',
+    color: 'var(--text-secondary)',
+    padding: '8px 0',
+  },
+  retryLink: {
+    color: 'var(--accent)',
+    cursor: 'pointer',
+    fontWeight: '500',
+  },
+  regenerateBtn: {
+    fontSize: '11px',
+    color: 'var(--text-secondary)',
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    alignSelf: 'flex-end',
+    padding: '2px 0',
+    marginTop: '2px',
   },
 }
