@@ -56,13 +56,13 @@ const steps = [
 const profiles = [
   {
     name: "Марія", age: 22, city: "Київ, здає квартиру", role: "Студентка", price: "9 500 грн/міс",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80",
+    avatar: "https://i.pinimg.com/1200x/f4/29/40/f429406b4dd227dc87e53f7c1031aeb9.jpg",
     compatibility: "100 %", compatibilityTone: "green",
     tags: ["Не курить", "Любить тишу", "Жайворонок", "Є кошеня"],
   },
   {
     name: "Олександр", age: 24, city: "Львів, шукає квартиру", role: "Працює віддалено", price: "12 000 грн/міс",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80",
+    avatar: "https://i.pinimg.com/736x/44/6b/6d/446b6db9682f95fdbfb7e4030c7c5bc2.jpg",
     compatibility: "88, 5 %", compatibilityTone: "yellow",
     tags: ["Курить", "Грає на гітарі", "Любить музику", "З тваринами ок"],
   },
@@ -249,7 +249,7 @@ export default function Home() {
               >
                 <div style={{ display: 'flex', gap: '16px' }}>
                   <img
-                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=220&q=80"
+                    src="https://i.pinimg.com/1200x/f4/29/40/f429406b4dd227dc87e53f7c1031aeb9.jpg"
                     alt="Марія"
                     style={{
                       height: '80px',
@@ -366,7 +366,7 @@ export default function Home() {
             {/* Віджет 3: Метч */}
             <div style={styles.floatingCard3}>
               <div style={{ display: 'flex', marginLeft: '10px' }}>
-                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=160&q=80" alt="Олександр" style={{ height: '56px', width: '56px', borderRadius: '50%', border: '4px solid var(--surface)', objectFit: 'cover', marginLeft: '-10px' }} />
+                <img src="https://i.pinimg.com/736x/44/6b/6d/446b6db9682f95fdbfb7e4030c7c5bc2.jpg" alt="Олександр" style={{ height: '56px', width: '56px', borderRadius: '50%', border: '4px solid var(--surface)', objectFit: 'cover', marginLeft: '-10px' }} />
                 <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=160&q=80" alt="Ірина" style={{ height: '56px', width: '56px', borderRadius: '50%', border: '4px solid var(--surface)', objectFit: 'cover', marginLeft: '-10px' }} />
               </div>
               <p style={{ margin: '16px 0', fontSize: '15px', fontWeight: 'bold', color: 'var(--text)' }}>Олександр надсилає вам запит!</p>

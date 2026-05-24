@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import GroupTab from '../components/GroupTab'
 import api from '../api/axios'
 import { User, Home, Coffee, ChevronRight, ChevronLeft, Save, Inbox, Users } from 'lucide-react'
+import ProfileModal from '../components/ProfileModal'
 
 
 const CITIES = [
@@ -498,6 +499,8 @@ function CheckCard({ label, emoji, checked, onChange }) {
 function RequestsTab() {
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(true)
+  const [viewProfile, setViewProfile] = useState(null)
+  const [profileLoading, setProfileLoading] = useState(false)
 
   useEffect(() => {
     api.get('/contacts/incoming')
@@ -509,6 +512,18 @@ function RequestsTab() {
   const respond = async (id, accept) => {
     await api.post(`/contacts/request/${id}/${accept ? 'accept' : 'decline'}`)
     setRequests(r => r.filter(req => req.request_id !== id))
+  }
+  const handleViewProfile = async (userId) => {
+    if (!userId) return
+    setProfileLoading(true)
+    try {
+      const res = await api.get(`/profiles/user/${userId}`)
+      setViewProfile({ ...res.data, user_id: userId })
+    } catch (err) {
+      console.error('Не вдалося завантажити профіль', err)
+    } finally {
+      setProfileLoading(false)
+    }
   }
 
   if (loading) return <div style={{ color: 'var(--text-secondary)', padding: '2rem 0', textAlign: 'center' }}>Завантаження...</div>
@@ -526,18 +541,34 @@ function RequestsTab() {
       {requests.map(r => (
         <div key={r.request_id} style={requestCardStyle}>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: '14px' }}>
+            
+            {/* 3. Робимо аватар клікабельним */}
             <div style={{
               width: '46px', height: '46px', borderRadius: '50%',
               background: 'var(--accent-secondary)', color: 'var(--accent)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontFamily: 'DM Serif Display, serif', fontSize: '20px', flexShrink: 0,
-            }}>
+              cursor: 'pointer', // додано курсор
+              opacity: profileLoading ? 0.7 : 1 // візуальний фідбек при завантаженні
+            }}
+            onClick={() => handleViewProfile(r.from_user_id)}
+            title="Переглянути анкету"
+            >
               {r.name?.[0] || '?'}
             </div>
+            
             <div>
-              <div style={{ fontWeight: '600', fontSize: '15px' }}>
+              {/* 4. Робимо ім'я клікабельним з ефектом наведення */}
+              <div 
+                style={{ fontWeight: '600', fontSize: '15px', cursor: 'pointer', transition: 'color 0.2s' }}
+                onClick={() => handleViewProfile(r.from_user_id)}
+                onMouseEnter={(e) => e.target.style.color = 'var(--accent)'}
+                onMouseLeave={(e) => e.target.style.color = ''}
+                title="Переглянути анкету"
+              >
                 {r.name || 'Без імені'}, {r.age}
               </div>
+              
               <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>
                 {r.city} · {r.schedule === 'early_bird' ? '🌅 Жайворонок' : r.schedule === 'night_owl' ? '🦉 Сова' : 'Без режиму'}
               </div>
@@ -569,6 +600,13 @@ function RequestsTab() {
           </div>
         </div>
       ))}
+      {viewProfile && (
+        <ProfileModal
+          profile={viewProfile}
+          onClose={() => setViewProfile(null)}
+          zIndex={200}
+        />
+      )}
     </div>
   )
 }
